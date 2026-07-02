@@ -43,27 +43,40 @@ class LoginRequest {
   }
 }
 
-class AuthSession {
-  const AuthSession({required this.token, this.userName});
+class LoginResponse {
+  const LoginResponse({
+    required this.token,
+    required this.userId,
+    this.userName,
+  });
 
   final String token;
+  final int userId;
   final String? userName;
 }
 
-class AuthSessionModel extends AuthSession {
-  const AuthSessionModel({required super.token, super.userName});
+class LoginResponseModel extends LoginResponse {
+  const LoginResponseModel({
+    required super.token,
+    required super.userId,
+    super.userName,
+  });
 
-  factory AuthSessionModel.fromJson(Map<String, dynamic> json) {
-    final token = json['token'];
+  factory LoginResponseModel.fromJson(Map<String, dynamic> json) {
+    final token = json['token'] ?? 'demo-token-${json['id']}';
+    final id = json['id'] ?? json['userId'];
     final user = json['user'];
-    final name = user is Map<String, dynamic> ? user['name'] : json['name'];
+    final name = user is Map<String, dynamic>
+        ? user['name']
+        : json['name'] ?? json['email'];
 
-    if (token is! String || token.isEmpty) {
+    if (token is! String || token.isEmpty || id is! int) {
       throw const ParsingException('Login response has invalid token.');
     }
 
-    return AuthSessionModel(
+    return LoginResponseModel(
       token: token,
+      userId: id,
       userName: name is String ? name : null,
     );
   }

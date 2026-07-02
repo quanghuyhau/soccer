@@ -36,11 +36,11 @@ class LoginDataSource {
 
   final ApiClient _apiClient;
 
-  Future<AuthSessionModel> login(LoginRequest request) async {
-    final response = await _apiClient.post<AuthSessionModel>(
-      '/login',
+  Future<LoginResponseModel> login(LoginRequest request) async {
+    final response = await _apiClient.post<LoginResponseModel>(
+      '/posts',
       data: request.toJson(),
-      parser: (data) => AuthSessionModel.fromJson(_asJsonObject(data)),
+      parser: (data) => LoginResponseModel.fromJson(_asJsonObject(data)),
     );
 
     return response.data;

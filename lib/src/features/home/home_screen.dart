@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/error/app_exception.dart';
+import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_state_views.dart';
+import '../login/login_screen.dart';
 import 'home_controller.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -28,6 +30,18 @@ class HomeScreen extends ConsumerWidget {
               Text(
                 'Feature only keeps controller and screen.',
                 style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              AppButton.outlined(
+                label: 'Open login flow',
+                icon: const Icon(Icons.login),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const LoginScreen(),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 24),
               Expanded(
