@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/app_config.dart';
 import 'app_interceptor.dart';
 import 'auth_token_provider.dart';
+import 'curl_log_interceptor.dart';
 
 final dioProvider = Provider<Dio>((ref) {
   final config = ref.watch(appConfigProvider);
@@ -20,6 +21,7 @@ final dioProvider = Provider<Dio>((ref) {
     )
     ..interceptors.addAll([
       AppInterceptor(authToken),
+      const CurlLogInterceptor(),
       LogInterceptor(requestBody: true, responseBody: true),
     ]);
 });
