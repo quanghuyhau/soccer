@@ -42,7 +42,6 @@ lib/src/core/
     api_client.dart
     dio_provider.dart
     app_interceptor.dart
-    curl_log_interceptor.dart
   repository/base_repository.dart
   usecase/usecase.dart
   widgets/
@@ -341,7 +340,7 @@ final response = await ref
 
 ## Log cURL
 
-Dio da gan `CurlLogInterceptor`.
+Dio da gan package `curl_logger_dio_interceptor`.
 
 Moi request trong debug mode se in ra dang:
 
@@ -352,7 +351,7 @@ curl -X POST -H 'Accept: application/json' --data-raw '{"email":"..."}' 'https:/
 File:
 
 ```text
-lib/src/core/network/curl_log_interceptor.dart
+lib/src/core/network/dio_provider.dart
 ```
 
 Interceptor nay chay sau `AppInterceptor`, nen header token neu co se duoc log trong cURL.
