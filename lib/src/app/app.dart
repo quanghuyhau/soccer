@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../features/home/home_screen.dart';
+import '../features/auth/auth_gate.dart';
 
 class SoccerApp extends StatelessWidget {
   const SoccerApp({super.key});
@@ -11,10 +11,14 @@ class SoccerApp extends StatelessWidget {
       title: 'Soccer',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1B7F3A)),
         useMaterial3: true,
+        cardTheme: const CardThemeData(
+          margin: EdgeInsets.zero,
+          clipBehavior: Clip.antiAlias,
+        ),
       ),
-      home: const HomeScreen(),
+      home: const AuthGate(),
     );
   }
 }

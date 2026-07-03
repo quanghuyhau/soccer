@@ -1,7 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final appConfigProvider = Provider<AppConfig>((ref) {
-  return const AppConfig(baseUrl: 'https://jsonplaceholder.typicode.com');
+  return const AppConfig(
+    baseUrl: String.fromEnvironment(
+      'API_BASE_URL',
+      defaultValue: 'http://localhost:8090',
+    ),
+  );
 });
 
 class AppConfig {
