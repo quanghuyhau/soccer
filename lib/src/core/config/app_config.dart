@@ -4,7 +4,7 @@ final appConfigProvider = Provider<AppConfig>((ref) {
   return const AppConfig(
     baseUrl: String.fromEnvironment(
       'API_BASE_URL',
-      defaultValue: 'http://localhost:8090',
+      defaultValue: 'http://192.168.102.123:8090',
     ),
   );
 });

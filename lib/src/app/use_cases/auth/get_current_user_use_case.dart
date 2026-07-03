@@ -6,7 +6,7 @@ class GetCurrentUserUseCase {
 
   final AuthRepository _repository;
 
-  Future<AppUser> call() {
-    return _repository.getCurrentUser();
+  Future<AppUser> call({String? accessToken}) {
+    return _repository.getCurrentUser(accessToken: accessToken);
   }
 }

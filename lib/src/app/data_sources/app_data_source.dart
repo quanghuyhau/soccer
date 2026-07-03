@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/error/app_exception.dart';
@@ -54,9 +55,16 @@ class AuthDataSource {
     return AppUserModel.fromJson(_resultObject(response.data));
   }
 
-  Future<AppUserModel> getCurrentUser() async {
-    final json = await _apiClient.getJson('/api/users/me');
-    return AppUserModel.fromJson(_resultObject(json));
+  Future<AppUserModel> getCurrentUser({String? accessToken}) async {
+    final response = await _apiClient.request<Map<String, dynamic>>(
+      '/api/users/me',
+      parser: _asJsonObject,
+      options: accessToken == null || accessToken.isEmpty
+          ? null
+          : Options(headers: {'Authorization': 'Bearer $accessToken'}),
+    );
+
+    return AppUserModel.fromJson(_resultObject(response.data));
   }
 }
 

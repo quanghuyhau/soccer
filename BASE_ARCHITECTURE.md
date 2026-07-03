@@ -16,13 +16,13 @@ File:
 lib/src/core/config/app_config.dart
 ```
 
-Mac dinh dang cau hinh:
+Mac dinh dang cau hinh theo IP LAN hien tai:
 
 ```text
-http://localhost:8090
+http://192.168.102.123:8090
 ```
 
-Khi chay tren dien thoai that, khong dung `localhost`. Truyen IP may dang chay backend:
+Khi IP may backend thay doi, truyen IP moi bang dart-define:
 
 ```bash
 flutter run --dart-define=API_BASE_URL=http://192.168.102.123:8090
