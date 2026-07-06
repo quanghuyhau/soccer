@@ -332,7 +332,9 @@ class PitchPrice {
     required this.pitchName,
     required this.startTime,
     required this.endTime,
-    required this.pricePerHour,
+    required this.slotMinutes,
+    required this.priceType,
+    required this.price,
   });
 
   final String id;
@@ -340,7 +342,9 @@ class PitchPrice {
   final String pitchName;
   final String startTime;
   final String endTime;
-  final num pricePerHour;
+  final int slotMinutes;
+  final String priceType;
+  final num price;
 }
 
 class PitchPriceModel extends PitchPrice {
@@ -350,7 +354,9 @@ class PitchPriceModel extends PitchPrice {
     required super.pitchName,
     required super.startTime,
     required super.endTime,
-    required super.pricePerHour,
+    required super.slotMinutes,
+    required super.priceType,
+    required super.price,
   });
 
   factory PitchPriceModel.fromJson(Map<String, dynamic> json) {
@@ -360,7 +366,11 @@ class PitchPriceModel extends PitchPrice {
       pitchName: _string(json['pitchName']),
       startTime: _string(json['startTime']),
       endTime: _string(json['endTime']),
-      pricePerHour: json['pricePerHour'] is num
+      slotMinutes: json['slotMinutes'] is int ? json['slotMinutes'] as int : 90,
+      priceType: _string(json['priceType'], fallback: 'NORMAL'),
+      price: json['price'] is num
+          ? json['price'] as num
+          : json['pricePerHour'] is num
           ? json['pricePerHour'] as num
           : 0,
     );
@@ -371,18 +381,24 @@ class CreatePitchPriceRequest {
   const CreatePitchPriceRequest({
     required this.startTime,
     required this.endTime,
-    required this.pricePerHour,
+    required this.slotMinutes,
+    required this.priceType,
+    required this.price,
   });
 
   final String startTime;
   final String endTime;
-  final num pricePerHour;
+  final int slotMinutes;
+  final String priceType;
+  final num price;
 
   Map<String, dynamic> toJson() {
     return {
       'startTime': startTime,
       'endTime': endTime,
-      'pricePerHour': pricePerHour,
+      'slotMinutes': slotMinutes,
+      'priceType': priceType,
+      'price': price,
     };
   }
 }
@@ -461,7 +477,6 @@ class CreateBookingRequest {
     required this.customerName,
     required this.customerPhone,
     required this.startTime,
-    required this.endTime,
     required this.note,
   });
 
@@ -469,7 +484,6 @@ class CreateBookingRequest {
   final String customerName;
   final String customerPhone;
   final DateTime startTime;
-  final DateTime endTime;
   final String note;
 
   Map<String, dynamic> toJson() {
@@ -478,7 +492,6 @@ class CreateBookingRequest {
       'customerName': customerName,
       'customerPhone': customerPhone,
       'startTime': _toApiDateTime(startTime),
-      'endTime': _toApiDateTime(endTime),
       'note': note,
     };
   }

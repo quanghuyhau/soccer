@@ -203,6 +203,28 @@ class PitchDataSource {
 
     return PitchPriceModel.fromJson(_resultObject(response.data));
   }
+
+  Future<PitchPriceModel> updatePitchPrice({
+    required String priceId,
+    required CreatePitchPriceRequest request,
+  }) async {
+    final response = await _apiClient.put<Map<String, dynamic>>(
+      '/api/pitch-prices/$priceId',
+      data: request.toJson(),
+      parser: _asJsonObject,
+    );
+
+    return PitchPriceModel.fromJson(_resultObject(response.data));
+  }
+
+  Future<void> deletePitchPrice(String priceId) async {
+    final response = await _apiClient.delete<Map<String, dynamic>>(
+      '/api/pitch-prices/$priceId',
+      parser: _asJsonObject,
+    );
+
+    _ensureSuccess(response.data);
+  }
 }
 
 class BookingDataSource {
@@ -245,7 +267,7 @@ class BookingDataSource {
     required String bookingId,
     required UpdateBookingStatusRequest request,
   }) async {
-    final response = await _apiClient.put<Map<String, dynamic>>(
+    final response = await _apiClient.post<Map<String, dynamic>>(
       '/api/bookings/$bookingId/status',
       data: request.toJson(),
       parser: _asJsonObject,

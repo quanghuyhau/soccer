@@ -207,7 +207,9 @@ class OwnerScreen extends ConsumerWidget {
                           label: 'Xác nhận',
                           icon: const Icon(Icons.check),
                           isLoading: statusState.isLoading && canConfirm,
-                          onPressed: canConfirm ? () => _update(ref, booking.id, 'CONFIRMED') : null,
+                          onPressed: canConfirm
+                              ? () => _update(ref, booking.id, 'CONFIRMED')
+                              : null,
                         ),
                         AppButton.outlined(
                           label: 'Hoàn tất',
@@ -235,7 +237,9 @@ class OwnerScreen extends ConsumerWidget {
   }
 
   void _update(WidgetRef ref, String bookingId, String status) {
-    ref.read(bookingStatusControllerProvider.notifier).update(bookingId: bookingId, status: status);
+    ref
+        .read(bookingStatusControllerProvider.notifier)
+        .update(bookingId: bookingId, status: status);
   }
 }
 

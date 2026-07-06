@@ -18,4 +18,9 @@ abstract interface class PitchRepository {
     required String pitchId,
     required CreatePitchPriceRequest request,
   });
+  Future<PitchPrice> updatePitchPrice({
+    required String priceId,
+    required CreatePitchPriceRequest request,
+  });
+  Future<void> deletePitchPrice(String priceId);
 }

@@ -13,12 +13,12 @@ final venueDetailControllerProvider = FutureProvider.autoDispose
       return ref.watch(appUseCaseProvider).getVenueDetail(venueId);
     });
 
-final createPitchPriceControllerProvider =
+final pitchPriceMutationControllerProvider =
     StateNotifierProvider.autoDispose<
-      CreatePitchPriceController,
-      AsyncValue<PitchPrice?>
+      PitchPriceMutationController,
+      AsyncValue<Object?>
     >((ref) {
-      return CreatePitchPriceController(ref);
+      return PitchPriceMutationController(ref);
     });
 
 final createPitchControllerProvider =
@@ -98,9 +98,8 @@ class PitchMutationController extends StateNotifier<AsyncValue<Object?>> {
   }
 }
 
-class CreatePitchPriceController
-    extends StateNotifier<AsyncValue<PitchPrice?>> {
-  CreatePitchPriceController(this._ref) : super(const AsyncData(null));
+class PitchPriceMutationController extends StateNotifier<AsyncValue<Object?>> {
+  PitchPriceMutationController(this._ref) : super(const AsyncData(null));
 
   final Ref _ref;
 
@@ -116,6 +115,36 @@ class CreatePitchPriceController
           .createPitchPrice(
             CreatePitchPriceParams(pitchId: pitchId, request: request),
           );
+    });
+
+    _ref.invalidate(venueDetailControllerProvider(venueId));
+  }
+
+  Future<void> update({
+    required String venueId,
+    required String priceId,
+    required CreatePitchPriceRequest request,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() {
+      return _ref
+          .read(appUseCaseProvider)
+          .updatePitchPrice(
+            UpdatePitchPriceParams(priceId: priceId, request: request),
+          );
+    });
+
+    _ref.invalidate(venueDetailControllerProvider(venueId));
+  }
+
+  Future<void> delete({
+    required String venueId,
+    required String priceId,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await _ref.read(appUseCaseProvider).deletePitchPrice(priceId);
+      return true;
     });
 
     _ref.invalidate(venueDetailControllerProvider(venueId));

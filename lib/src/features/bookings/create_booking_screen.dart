@@ -33,8 +33,8 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
   final _dateController = TextEditingController(
     text: AppFormatters.date(DateTime.now()),
   );
-  final _startController = TextEditingController(text: '18:00');
   final _noteController = TextEditingController();
+  DateTime? _selectedSlotStart;
 
   @override
   void initState() {
@@ -49,7 +49,6 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
     _nameController.dispose();
     _phoneController.dispose();
     _dateController.dispose();
-    _startController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -57,7 +56,9 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
   @override
   Widget build(BuildContext context) {
     final createState = ref.watch(createBookingControllerProvider);
-    final preview = _previewPrice();
+    final slots = _availableSlots();
+    final selectedSlot = _selectedSlot(slots);
+    final preview = _previewPrice(selectedSlot);
 
     ref.listen(createBookingControllerProvider, (previous, next) {
       next.whenOrNull(
@@ -98,28 +99,21 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
                 children: [
                   _field(_nameController, 'Tên khách hàng', Icons.person),
                   _field(_phoneController, 'Số điện thoại', Icons.phone),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _field(
-                          _dateController,
-                          'Ngày',
-                          Icons.today,
-                          onChanged: (_) => setState(() {}),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _field(
-                          _startController,
-                          'Bắt đầu',
-                          Icons.schedule,
-                          onChanged: (_) => setState(() {}),
-                        ),
-                      ),
-                    ],
+                  _field(
+                    _dateController,
+                    'Ngày',
+                    Icons.today,
+                    onChanged: (_) {
+                      setState(() => _selectedSlotStart = null);
+                    },
                   ),
-                  _AutoEndTimeCard(endTime: _endTime()),
+                  _SlotPicker(
+                    slots: slots,
+                    selectedSlot: selectedSlot,
+                    onSelected: (slot) {
+                      setState(() => _selectedSlotStart = slot.startTime);
+                    },
+                  ),
                   _PricePreviewCard(preview: preview, prices: widget.prices),
                   _field(_noteController, 'Ghi chú', Icons.notes, maxLines: 3),
                   const SizedBox(height: 4),
@@ -161,21 +155,12 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
   }
 
   void _submit() {
-    final date = _dateController.text.trim();
-    final start = _startController.text.trim();
-    final startTime = _dateTimeAt(date, start);
-    final endTime = _endTime();
+    final slot = _selectedSlot(_availableSlots());
+    final startTime = slot?.startTime;
 
-    if (startTime == null || endTime == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Thời gian không hợp lệ')));
-      return;
-    }
-
-    if (!endTime.isAfter(startTime)) {
+    if (startTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Giờ kết thúc phải sau giờ bắt đầu')),
+        const SnackBar(content: Text('Vui lòng chọn khung giờ hợp lệ')),
       );
       return;
     }
@@ -188,66 +173,26 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
             customerName: _nameController.text.trim(),
             customerPhone: _phoneController.text.trim(),
             startTime: startTime,
-            endTime: endTime,
             note: _noteController.text.trim(),
           ),
         );
   }
 
-  _PricePreview _previewPrice() {
-    final date = _dateController.text.trim();
-    final start = _startController.text.trim();
-    final startTime = _dateTimeAt(date, start);
-    final endTime = _endTime();
-
+  _PricePreview _previewPrice(_BookingSlot? slot) {
     if (widget.prices.isEmpty) {
       return const _PricePreview(
         message: 'Sân này chưa có bảng giá. Backend sẽ báo lỗi nếu đặt ngay.',
       );
     }
 
-    if (startTime == null || endTime == null || !endTime.isAfter(startTime)) {
-      return const _PricePreview(message: 'Chọn thời gian hợp lệ để xem giá.');
-    }
-
-    var total = 0.0;
-    var coveredMinutes = 0;
-
-    for (final price in widget.prices) {
-      final priceStart = _dateTimeAt(date, price.startTime);
-      var priceEnd = _dateTimeAt(date, price.endTime);
-
-      if (priceStart == null || priceEnd == null) {
-        continue;
-      }
-
-      if (!priceEnd.isAfter(priceStart)) {
-        priceEnd = priceEnd.add(const Duration(days: 1));
-      }
-
-      final overlapStart = startTime.isAfter(priceStart)
-          ? startTime
-          : priceStart;
-      final overlapEnd = endTime.isBefore(priceEnd) ? endTime : priceEnd;
-
-      if (!overlapEnd.isAfter(overlapStart)) {
-        continue;
-      }
-
-      final minutes = overlapEnd.difference(overlapStart).inMinutes;
-      coveredMinutes += minutes;
-      total += minutes / 60 * price.pricePerHour;
-    }
-
-    final bookingMinutes = endTime.difference(startTime).inMinutes;
-    if (coveredMinutes < bookingMinutes) {
+    if (slot == null) {
       return const _PricePreview(
-        message: 'Khung giờ này chưa có bảng giá đầy đủ.',
+        message: 'Không có slot 90 phút phù hợp trong bảng giá.',
       );
     }
 
     return _PricePreview(
-      amount: total,
+      amount: slot.price.price,
       message: 'Giá tạm tính. Giá cuối cùng lấy từ backend sau khi đặt.',
     );
   }
@@ -257,13 +202,55 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
     return DateTime.tryParse('${date}T$normalizedTime');
   }
 
-  DateTime? _endTime() {
-    final startTime = _dateTimeAt(
-      _dateController.text.trim(),
-      _startController.text.trim(),
-    );
+  List<_BookingSlot> _availableSlots() {
+    final date = _dateController.text.trim();
+    final slots = <_BookingSlot>[];
 
-    return startTime?.add(const Duration(minutes: 90));
+    for (final price in widget.prices) {
+      if (price.slotMinutes != _slotMinutes) {
+        continue;
+      }
+
+      final rangeStart = _dateTimeAt(date, price.startTime);
+      var rangeEnd = _dateTimeAt(date, price.endTime);
+
+      if (rangeStart == null || rangeEnd == null) {
+        continue;
+      }
+
+      if (!rangeEnd.isAfter(rangeStart)) {
+        rangeEnd = rangeEnd.add(const Duration(days: 1));
+      }
+
+      var cursor = rangeStart;
+      while (!cursor.add(_slotDuration).isAfter(rangeEnd)) {
+        slots.add(
+          _BookingSlot(
+            startTime: cursor,
+            endTime: cursor.add(_slotDuration),
+            price: price,
+          ),
+        );
+        cursor = cursor.add(_slotDuration);
+      }
+    }
+
+    slots.sort((a, b) => a.startTime.compareTo(b.startTime));
+    return slots;
+  }
+
+  _BookingSlot? _selectedSlot(List<_BookingSlot> slots) {
+    if (slots.isEmpty) {
+      return null;
+    }
+
+    for (final slot in slots) {
+      if (slot.startTime == _selectedSlotStart) {
+        return slot;
+      }
+    }
+
+    return slots.first;
   }
 
   String _errorMessage(Object error) {
@@ -279,6 +266,21 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
   }
 }
 
+const _slotMinutes = 90;
+const _slotDuration = Duration(minutes: _slotMinutes);
+
+class _BookingSlot {
+  const _BookingSlot({
+    required this.startTime,
+    required this.endTime,
+    required this.price,
+  });
+
+  final DateTime startTime;
+  final DateTime endTime;
+  final PitchPrice price;
+}
+
 class _PricePreview {
   const _PricePreview({this.amount, required this.message});
 
@@ -286,44 +288,78 @@ class _PricePreview {
   final String message;
 }
 
-class _AutoEndTimeCard extends StatelessWidget {
-  const _AutoEndTimeCard({required this.endTime});
+class _SlotPicker extends StatelessWidget {
+  const _SlotPicker({
+    required this.slots,
+    required this.selectedSlot,
+    required this.onSelected,
+  });
 
-  final DateTime? endTime;
+  final List<_BookingSlot> slots;
+  final _BookingSlot? selectedSlot;
+  final ValueChanged<_BookingSlot> onSelected;
 
   @override
   Widget build(BuildContext context) {
+    if (slots.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(bottom: 12),
+        child: AppSurface(
+          padding: EdgeInsets.all(14),
+          child: Text('Chưa có slot 90 phút phù hợp trong bảng giá.'),
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: AppSurface(
         padding: const EdgeInsets.all(14),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.schedule_send, color: AppColors.teal),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Kết thúc tự động',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: AppColors.muted),
+            Text(
+              'Chọn khung giờ',
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: slots.map((slot) {
+                final selected = slot.startTime == selectedSlot?.startTime;
+                return ChoiceChip(
+                  selected: selected,
+                  label: Text(
+                    '${AppFormatters.time(slot.startTime)} - ${AppFormatters.time(slot.endTime)}',
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    endTime == null
-                        ? 'Chọn giờ bắt đầu hợp lệ'
-                        : AppFormatters.time(endTime!),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
+                  onSelected: (_) => onSelected(slot),
+                );
+              }).toList(),
+            ),
+            if (selectedSlot != null) ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(Icons.schedule_send, color: AppColors.teal),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Ca 90 phút, kết thúc ${AppFormatters.time(selectedSlot!.endTime)}',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: AppColors.muted),
                     ),
+                  ),
+                  AppStatusPill(
+                    label: selectedSlot!.price.priceType,
+                    color: AppColors.teal,
                   ),
                 ],
               ),
-            ),
-            const AppStatusPill(label: '+ 1h30p', color: AppColors.teal),
+            ],
           ],
         ),
       ),
@@ -380,7 +416,7 @@ class _PricePreviewCard extends StatelessWidget {
                       (price) => Chip(
                         label: Text(
                           '${_shortTime(price.startTime)} - ${_shortTime(price.endTime)}'
-                          ' / ${AppFormatters.money(price.pricePerHour)}',
+                          ' / ${AppFormatters.money(price.price)}',
                         ),
                       ),
                     )

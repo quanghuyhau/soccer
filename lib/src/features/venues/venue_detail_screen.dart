@@ -38,13 +38,13 @@ class VenueDetailScreen extends ConsumerWidget {
       );
     });
 
-    ref.listen(createPitchPriceControllerProvider, (previous, next) {
+    ref.listen(pitchPriceMutationControllerProvider, (previous, next) {
       next.whenOrNull(
-        data: (price) {
-          if (price != null && previous?.isLoading == true) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('Đã thêm khung giá')));
+        data: (value) {
+          if (value != null && previous?.isLoading == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Đã cập nhật bảng giá')),
+            );
           }
         },
         error: (error, stackTrace) {
@@ -237,7 +237,11 @@ class _PitchCard extends StatelessWidget {
               Text(pitch.description),
             ],
             const SizedBox(height: 12),
-            _PitchPriceList(prices: prices),
+            _PitchPriceList(
+              venueId: venue.id,
+              prices: prices,
+              canManage: canManagePrices,
+            ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
@@ -304,9 +308,15 @@ class _PitchCard extends StatelessWidget {
 }
 
 class _PitchPriceList extends StatelessWidget {
-  const _PitchPriceList({required this.prices});
+  const _PitchPriceList({
+    required this.venueId,
+    required this.prices,
+    required this.canManage,
+  });
 
+  final String venueId;
   final List<PitchPrice> prices;
+  final bool canManage;
 
   @override
   Widget build(BuildContext context) {
@@ -331,20 +341,45 @@ class _PitchPriceList extends StatelessWidget {
             ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: prices
-                .map(
-                  (price) => Chip(
-                    avatar: const Icon(Icons.schedule, size: 18),
-                    label: Text(
-                      '${_shortTime(price.startTime)} - ${_shortTime(price.endTime)}'
-                      ' / ${AppFormatters.money(price.pricePerHour)}',
-                    ),
-                  ),
-                )
-                .toList(),
+          ...prices.map(
+            (price) => ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.schedule),
+              title: Text(
+                '${_shortTime(price.startTime)} - ${_shortTime(price.endTime)}'
+                ' / ${AppFormatters.money(price.price)}',
+              ),
+              subtitle: Text('${price.priceType} - ${price.slotMinutes} phút'),
+              trailing: canManage
+                  ? PopupMenuButton<_PriceAction>(
+                      tooltip: 'Tuỳ chọn bảng giá',
+                      onSelected: (action) {
+                        switch (action) {
+                          case _PriceAction.edit:
+                            _showAddPriceDialog(
+                              context: context,
+                              venueId: venueId,
+                              pitchId: price.pitchId,
+                              price: price,
+                            );
+                          case _PriceAction.delete:
+                            _confirmDeletePrice(context, venueId, price);
+                        }
+                      },
+                      itemBuilder: (_) => const [
+                        PopupMenuItem(
+                          value: _PriceAction.edit,
+                          child: Text('Sửa giá'),
+                        ),
+                        PopupMenuItem(
+                          value: _PriceAction.delete,
+                          child: Text('Xoá giá'),
+                        ),
+                      ],
+                    )
+                  : null,
+            ),
           ),
         ],
       ),
@@ -352,15 +387,54 @@ class _PitchPriceList extends StatelessWidget {
   }
 }
 
+enum _PriceAction { edit, delete }
+
 void _showAddPriceDialog({
   required BuildContext context,
   required String venueId,
   required String pitchId,
+  PitchPrice? price,
 }) {
   showDialog<void>(
     context: context,
-    builder: (_) => _AddPriceDialog(venueId: venueId, pitchId: pitchId),
+    builder: (_) =>
+        _AddPriceDialog(venueId: venueId, pitchId: pitchId, price: price),
   );
+}
+
+Future<void> _confirmDeletePrice(
+  BuildContext context,
+  String venueId,
+  PitchPrice price,
+) async {
+  final container = ProviderScope.containerOf(context);
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text('Xoá bảng giá?'),
+      content: Text(
+        '${_shortTime(price.startTime)} - ${_shortTime(price.endTime)}'
+        ' / ${AppFormatters.money(price.price)}',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Huỷ'),
+        ),
+        AppButton.destructive(
+          label: 'Xoá',
+          icon: const Icon(Icons.delete_outline),
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
+      ],
+    ),
+  );
+
+  if (confirmed == true) {
+    container
+        .read(pitchPriceMutationControllerProvider.notifier)
+        .delete(venueId: venueId, priceId: price.id);
+  }
 }
 
 void _showAddPitchDialog({
@@ -427,6 +501,7 @@ class _AddPitchDialogState extends ConsumerState<_AddPitchDialog> {
   late final TextEditingController _surfaceController;
   final _priceStartController = TextEditingController(text: '06:00:00');
   final _priceEndController = TextEditingController(text: '17:00:00');
+  final _priceTypeController = TextEditingController(text: 'NORMAL');
   final _priceController = TextEditingController(text: '150000');
 
   @override
@@ -455,6 +530,7 @@ class _AddPitchDialogState extends ConsumerState<_AddPitchDialog> {
     _surfaceController.dispose();
     _priceStartController.dispose();
     _priceEndController.dispose();
+    _priceTypeController.dispose();
     _priceController.dispose();
     super.dispose();
   }
@@ -550,8 +626,14 @@ class _AddPitchDialogState extends ConsumerState<_AddPitchDialog> {
                 ),
                 const SizedBox(height: 12),
                 AppTextField(
+                  controller: _priceTypeController,
+                  label: 'Loại giá',
+                  icon: Icons.label_outline,
+                ),
+                const SizedBox(height: 12),
+                AppTextField(
                   controller: _priceController,
-                  label: 'Giá/giờ',
+                  label: 'Giá/ca 90 phút',
                   icon: Icons.payments_outlined,
                   keyboardType: TextInputType.number,
                 ),
@@ -603,7 +685,9 @@ class _AddPitchDialogState extends ConsumerState<_AddPitchDialog> {
               CreatePitchPriceRequest(
                 startTime: _normalizeTime(_priceStartController.text),
                 endTime: _normalizeTime(_priceEndController.text),
-                pricePerHour: price!,
+                slotMinutes: _slotMinutes,
+                priceType: _priceTypeController.text.trim(),
+                price: price!,
               ),
             ],
           );
@@ -618,34 +702,58 @@ class _AddPitchDialogState extends ConsumerState<_AddPitchDialog> {
 }
 
 class _AddPriceDialog extends ConsumerStatefulWidget {
-  const _AddPriceDialog({required this.venueId, required this.pitchId});
+  const _AddPriceDialog({
+    required this.venueId,
+    required this.pitchId,
+    this.price,
+  });
 
   final String venueId;
   final String pitchId;
+  final PitchPrice? price;
 
   @override
   ConsumerState<_AddPriceDialog> createState() => _AddPriceDialogState();
 }
 
 class _AddPriceDialogState extends ConsumerState<_AddPriceDialog> {
-  final _startController = TextEditingController(text: '06:00:00');
-  final _endController = TextEditingController(text: '17:00:00');
-  final _priceController = TextEditingController(text: '150000');
+  late final TextEditingController _startController;
+  late final TextEditingController _endController;
+  late final TextEditingController _priceTypeController;
+  late final TextEditingController _priceController;
+
+  @override
+  void initState() {
+    super.initState();
+    final price = widget.price;
+    _startController = TextEditingController(
+      text: price?.startTime ?? '06:00:00',
+    );
+    _endController = TextEditingController(text: price?.endTime ?? '17:00:00');
+    _priceTypeController = TextEditingController(
+      text: price?.priceType ?? 'NORMAL',
+    );
+    _priceController = TextEditingController(
+      text: price?.price.round().toString() ?? '150000',
+    );
+  }
 
   @override
   void dispose() {
     _startController.dispose();
     _endController.dispose();
+    _priceTypeController.dispose();
     _priceController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(createPitchPriceControllerProvider);
+    final state = ref.watch(pitchPriceMutationControllerProvider);
+    final isEdit = widget.price != null;
 
     return AlertDialog(
-      title: const Text('Thêm khung giá'),
+      title: Text(isEdit ? 'Sửa bảng giá' : 'Thêm bảng giá'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -662,8 +770,14 @@ class _AddPriceDialogState extends ConsumerState<_AddPriceDialog> {
           ),
           const SizedBox(height: 12),
           AppTextField(
+            controller: _priceTypeController,
+            label: 'Loại giá',
+            icon: Icons.label_outline,
+          ),
+          const SizedBox(height: 12),
+          AppTextField(
             controller: _priceController,
-            label: 'Giá/giờ',
+            label: 'Giá/ca 90 phút',
             icon: Icons.payments_outlined,
             keyboardType: TextInputType.number,
           ),
@@ -692,20 +806,35 @@ class _AddPriceDialogState extends ConsumerState<_AddPriceDialog> {
       return;
     }
 
-    ref
-        .read(createPitchPriceControllerProvider.notifier)
-        .create(
-          venueId: widget.venueId,
-          pitchId: widget.pitchId,
-          request: CreatePitchPriceRequest(
-            startTime: _normalizeTime(_startController.text),
-            endTime: _normalizeTime(_endController.text),
-            pricePerHour: price,
-          ),
-        );
+    final request = CreatePitchPriceRequest(
+      startTime: _normalizeTime(_startController.text),
+      endTime: _normalizeTime(_endController.text),
+      slotMinutes: _slotMinutes,
+      priceType: _priceTypeController.text.trim(),
+      price: price,
+    );
+    final controller = ref.read(pitchPriceMutationControllerProvider.notifier);
+    final currentPrice = widget.price;
+
+    if (currentPrice == null) {
+      controller.create(
+        venueId: widget.venueId,
+        pitchId: widget.pitchId,
+        request: request,
+      );
+    } else {
+      controller.update(
+        venueId: widget.venueId,
+        priceId: currentPrice.id,
+        request: request,
+      );
+    }
+
     Navigator.of(context).pop();
   }
 }
+
+const _slotMinutes = 90;
 
 String _normalizeTime(String value) {
   final trimmed = value.trim();

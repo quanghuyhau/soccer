@@ -162,18 +162,21 @@ CreateBookingScreen
  -> Gateway
 ```
 
-Logic booking theo API v2 pricing:
+Logic booking theo API pricing moi:
 
 ```text
 VenueDetailScreen
  -> GET /api/venues/{venueId}
  -> GET /api/venues/{venueId}/pitches
  -> GET /api/pitches/{pitchId}/prices
- -> hien thi bang gia + preview gia tam tinh
+ -> generate slot 90 phut tu bang gia
+ -> user chon slot hop le
+ -> hien thi bang gia + preview gia tam tinh theo gia/ca
  -> CreateBookingScreen
- -> POST /api/bookings khong gui totalPrice
+ -> POST /api/bookings chi gui startTime
+ -> backend tu tinh endTime = startTime + 90 phut
  -> backend tu tinh totalPrice
- -> app hien thi totalPrice tu response/list booking
+ -> app hien thi endTime/totalPrice tu response/list booking
 ```
 
 Request tao booking dung:
@@ -184,18 +187,31 @@ Request tao booking dung:
   "customerName": "Khach hang",
   "customerPhone": "0909999999",
   "startTime": "2026-07-02T18:00:00",
-  "endTime": "2026-07-02T19:30:00",
   "note": "Dat san buoi toi"
 }
 ```
 
-Khong gui `totalPrice` trong request. Gia cuoi cung lay tu response backend.
+Khong gui `endTime` va khong gui `totalPrice` trong request. Gia cuoi cung lay tu response backend.
+
+Bang gia pitch hien theo ca 90 phut:
+
+```json
+{
+  "startTime": "16:30:00",
+  "endTime": "22:30:00",
+  "slotMinutes": 90,
+  "priceType": "PEAK",
+  "price": 500000
+}
+```
 
 Owner tao/cau hinh san:
 
 ```text
 POST /api/venues/{venueId}/pitches
 POST /api/pitches/{pitchId}/prices
+PUT /api/pitch-prices/{priceId}
+DELETE /api/pitch-prices/{priceId}
 ```
 
 Usecase `CreatePitchUseCase` co the nhan them danh sach `prices` de tao san con xong tao luon khung gia ban dau.
