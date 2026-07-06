@@ -8,8 +8,10 @@ import 'bookings/create_booking_use_case.dart';
 import 'bookings/get_all_bookings_use_case.dart';
 import 'bookings/get_my_bookings_use_case.dart';
 import 'bookings/update_booking_status_use_case.dart';
+import 'venues/create_pitch_price_use_case.dart';
 import 'venues/create_pitch_use_case.dart';
 import 'venues/create_venue_use_case.dart';
+import 'venues/get_pitch_prices_use_case.dart';
 import 'venues/get_venue_detail_use_case.dart';
 import 'venues/get_venues_use_case.dart';
 import 'venues/get_venues_by_owner_use_case.dart';
@@ -21,8 +23,10 @@ export 'bookings/create_booking_use_case.dart';
 export 'bookings/get_all_bookings_use_case.dart';
 export 'bookings/get_my_bookings_use_case.dart';
 export 'bookings/update_booking_status_use_case.dart';
+export 'venues/create_pitch_price_use_case.dart';
 export 'venues/create_pitch_use_case.dart';
 export 'venues/create_venue_use_case.dart';
+export 'venues/get_pitch_prices_use_case.dart';
 export 'venues/get_venue_detail_use_case.dart';
 export 'venues/get_venues_use_case.dart';
 export 'venues/get_venues_by_owner_use_case.dart';
@@ -42,6 +46,8 @@ final appUseCaseProvider = Provider<AppUseCase>((ref) {
     getVenuesByOwner: GetVenuesByOwnerUseCase(repository.venues),
     createVenue: CreateVenueUseCase(repository.venues),
     createPitch: CreatePitchUseCase(repository.pitches),
+    getPitchPrices: GetPitchPricesUseCase(repository.pitches),
+    createPitchPrice: CreatePitchPriceUseCase(repository.pitches),
     createBooking: CreateBookingUseCase(repository.bookings),
     getMyBookings: GetMyBookingsUseCase(repository.bookings),
     getAllBookings: GetAllBookingsUseCase(repository.bookings),
@@ -59,6 +65,8 @@ class AppUseCase {
     required this.getVenuesByOwner,
     required this.createVenue,
     required this.createPitch,
+    required this.getPitchPrices,
+    required this.createPitchPrice,
     required this.createBooking,
     required this.getMyBookings,
     required this.getAllBookings,
@@ -73,6 +81,8 @@ class AppUseCase {
   final GetVenuesByOwnerUseCase getVenuesByOwner;
   final CreateVenueUseCase createVenue;
   final CreatePitchUseCase createPitch;
+  final GetPitchPricesUseCase getPitchPrices;
+  final CreatePitchPriceUseCase createPitchPrice;
   final CreateBookingUseCase createBooking;
   final GetMyBookingsUseCase getMyBookings;
   final GetAllBookingsUseCase getAllBookings;

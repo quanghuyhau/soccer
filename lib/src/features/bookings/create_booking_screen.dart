@@ -15,10 +15,12 @@ class CreateBookingScreen extends ConsumerStatefulWidget {
     super.key,
     required this.venue,
     required this.pitch,
+    this.prices = const [],
   });
 
   final Venue venue;
   final Pitch pitch;
+  final List<PitchPrice> prices;
 
   @override
   ConsumerState<CreateBookingScreen> createState() =>
@@ -33,7 +35,6 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
   );
   final _startController = TextEditingController(text: '18:00');
   final _endController = TextEditingController(text: '19:30');
-  final _priceController = TextEditingController(text: '300000');
   final _noteController = TextEditingController();
 
   @override
@@ -51,7 +52,6 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
     _dateController.dispose();
     _startController.dispose();
     _endController.dispose();
-    _priceController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -59,6 +59,7 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
   @override
   Widget build(BuildContext context) {
     final createState = ref.watch(createBookingControllerProvider);
+    final preview = _previewPrice();
 
     ref.listen(createBookingControllerProvider, (previous, next) {
       next.whenOrNull(
@@ -102,7 +103,12 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: _field(_dateController, 'Ngày', Icons.today),
+                        child: _field(
+                          _dateController,
+                          'Ngày',
+                          Icons.today,
+                          onChanged: (_) => setState(() {}),
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -110,17 +116,18 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
                           _startController,
                           'Bắt đầu',
                           Icons.schedule,
+                          onChanged: (_) => setState(() {}),
                         ),
                       ),
                     ],
                   ),
-                  _field(_endController, 'Kết thúc', Icons.schedule_send),
                   _field(
-                    _priceController,
-                    'Tổng tiền',
-                    Icons.payments_outlined,
-                    keyboardType: TextInputType.number,
+                    _endController,
+                    'Kết thúc',
+                    Icons.schedule_send,
+                    onChanged: (_) => setState(() {}),
                   ),
+                  _PricePreviewCard(preview: preview, prices: widget.prices),
                   _field(_noteController, 'Ghi chú', Icons.notes, maxLines: 3),
                   const SizedBox(height: 4),
                   AppButton.primary(
@@ -145,6 +152,7 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
     IconData icon, {
     TextInputType? keyboardType,
     int maxLines = 1,
+    ValueChanged<String>? onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -154,6 +162,7 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
         icon: icon,
         keyboardType: keyboardType,
         maxLines: maxLines,
+        onChanged: onChanged,
       ),
     );
   }
@@ -162,13 +171,20 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
     final date = _dateController.text.trim();
     final start = _startController.text.trim();
     final end = _endController.text.trim();
-    final startTime = DateTime.tryParse('${date}T$start:00');
-    final endTime = DateTime.tryParse('${date}T$end:00');
+    final startTime = _dateTimeAt(date, start);
+    final endTime = _dateTimeAt(date, end);
 
     if (startTime == null || endTime == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Thời gian không hợp lệ')));
+      return;
+    }
+
+    if (!endTime.isAfter(startTime)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Giờ kết thúc phải sau giờ bắt đầu')),
+      );
       return;
     }
 
@@ -181,17 +197,158 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
             customerPhone: _phoneController.text.trim(),
             startTime: startTime,
             endTime: endTime,
-            totalPrice: num.tryParse(_priceController.text.trim()) ?? 0,
             note: _noteController.text.trim(),
           ),
         );
   }
 
+  _PricePreview _previewPrice() {
+    final date = _dateController.text.trim();
+    final start = _startController.text.trim();
+    final end = _endController.text.trim();
+    final startTime = _dateTimeAt(date, start);
+    final endTime = _dateTimeAt(date, end);
+
+    if (widget.prices.isEmpty) {
+      return const _PricePreview(
+        message: 'Sân này chưa có bảng giá. Backend sẽ báo lỗi nếu đặt ngay.',
+      );
+    }
+
+    if (startTime == null || endTime == null || !endTime.isAfter(startTime)) {
+      return const _PricePreview(message: 'Chọn thời gian hợp lệ để xem giá.');
+    }
+
+    var total = 0.0;
+    var coveredMinutes = 0;
+
+    for (final price in widget.prices) {
+      final priceStart = _dateTimeAt(date, price.startTime);
+      var priceEnd = _dateTimeAt(date, price.endTime);
+
+      if (priceStart == null || priceEnd == null) {
+        continue;
+      }
+
+      if (!priceEnd.isAfter(priceStart)) {
+        priceEnd = priceEnd.add(const Duration(days: 1));
+      }
+
+      final overlapStart = startTime.isAfter(priceStart)
+          ? startTime
+          : priceStart;
+      final overlapEnd = endTime.isBefore(priceEnd) ? endTime : priceEnd;
+
+      if (!overlapEnd.isAfter(overlapStart)) {
+        continue;
+      }
+
+      final minutes = overlapEnd.difference(overlapStart).inMinutes;
+      coveredMinutes += minutes;
+      total += minutes / 60 * price.pricePerHour;
+    }
+
+    final bookingMinutes = endTime.difference(startTime).inMinutes;
+    if (coveredMinutes < bookingMinutes) {
+      return const _PricePreview(
+        message: 'Khung giờ này chưa có bảng giá đầy đủ.',
+      );
+    }
+
+    return _PricePreview(
+      amount: total,
+      message: 'Giá tạm tính. Giá cuối cùng lấy từ backend sau khi đặt.',
+    );
+  }
+
+  DateTime? _dateTimeAt(String date, String time) {
+    final normalizedTime = time.length == 5 ? '$time:00' : time;
+    return DateTime.tryParse('${date}T$normalizedTime');
+  }
+
   String _errorMessage(Object error) {
     if (error is AppException) {
+      if (error.message.contains('chưa được cấu hình giá')) {
+        return 'Sân này chưa có bảng giá cho khung giờ đã chọn.';
+      }
+
       return error.message;
     }
 
     return 'Không tạo được booking';
+  }
+}
+
+class _PricePreview {
+  const _PricePreview({this.amount, required this.message});
+
+  final num? amount;
+  final String message;
+}
+
+class _PricePreviewCard extends StatelessWidget {
+  const _PricePreviewCard({required this.preview, required this.prices});
+
+  final _PricePreview preview;
+  final List<PitchPrice> prices;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: AppSurface(
+        padding: const EdgeInsets.all(14),
+        color: AppColors.mint,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.payments_outlined, color: AppColors.teal),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    preview.amount == null
+                        ? 'Giá đặt sân'
+                        : AppFormatters.money(preview.amount!),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              preview.message,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.muted),
+            ),
+            if (prices.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: prices
+                    .map(
+                      (price) => Chip(
+                        label: Text(
+                          '${_shortTime(price.startTime)} - ${_shortTime(price.endTime)}'
+                          ' / ${AppFormatters.money(price.pricePerHour)}',
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _shortTime(String value) {
+    return value.length >= 5 ? value.substring(0, 5) : value;
   }
 }

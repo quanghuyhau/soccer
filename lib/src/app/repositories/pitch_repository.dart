@@ -8,4 +8,9 @@ abstract interface class PitchRepository {
     required String venueId,
     required CreatePitchRequest request,
   });
+  Future<List<PitchPrice>> getPitchPrices(String pitchId);
+  Future<PitchPrice> createPitchPrice({
+    required String pitchId,
+    required CreatePitchPriceRequest request,
+  });
 }

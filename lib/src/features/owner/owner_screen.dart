@@ -5,6 +5,7 @@ import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_design.dart';
 import '../../core/widgets/base_screen.dart';
 import '../bookings/my_bookings_screen.dart';
+import '../venues/venue_detail_screen.dart';
 import 'owner_controller.dart';
 
 class OwnerScreen extends ConsumerWidget {
@@ -93,6 +94,14 @@ class OwnerScreen extends ConsumerWidget {
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Card(
                     child: ListTile(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) =>
+                                VenueDetailScreen(venueId: venue.id),
+                          ),
+                        );
+                      },
                       leading: const Icon(Icons.stadium),
                       title: Text(venue.name),
                       subtitle: Text(venue.address),

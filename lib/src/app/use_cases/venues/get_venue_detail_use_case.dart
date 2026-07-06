@@ -15,7 +15,19 @@ class GetVenueDetailUseCase {
   Future<VenueDetailData> call(String venueId) async {
     final venue = await _venueRepository.getVenue(venueId);
     final pitches = await _pitchRepository.getPitchesByVenue(venueId);
+    final prices = await Future.wait(
+      pitches.map((pitch) => _pitchRepository.getPitchPrices(pitch.id)),
+    );
+    final pricesByPitch = <String, List<PitchPrice>>{};
 
-    return VenueDetailData(venue: venue, pitches: pitches);
+    for (var i = 0; i < pitches.length; i++) {
+      pricesByPitch[pitches[i].id] = prices[i];
+    }
+
+    return VenueDetailData(
+      venue: venue,
+      pitches: pitches,
+      pricesByPitch: pricesByPitch,
+    );
   }
 }

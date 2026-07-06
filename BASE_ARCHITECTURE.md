@@ -162,6 +162,44 @@ CreateBookingScreen
  -> Gateway
 ```
 
+Logic booking theo API v2 pricing:
+
+```text
+VenueDetailScreen
+ -> GET /api/venues/{venueId}
+ -> GET /api/venues/{venueId}/pitches
+ -> GET /api/pitches/{pitchId}/prices
+ -> hien thi bang gia + preview gia tam tinh
+ -> CreateBookingScreen
+ -> POST /api/bookings khong gui totalPrice
+ -> backend tu tinh totalPrice
+ -> app hien thi totalPrice tu response/list booking
+```
+
+Request tao booking dung:
+
+```json
+{
+  "pitchId": "uuid-pitch-id",
+  "customerName": "Khach hang",
+  "customerPhone": "0909999999",
+  "startTime": "2026-07-02T18:00:00",
+  "endTime": "2026-07-02T19:30:00",
+  "note": "Dat san buoi toi"
+}
+```
+
+Khong gui `totalPrice` trong request. Gia cuoi cung lay tu response backend.
+
+Owner tao/cau hinh san:
+
+```text
+POST /api/venues/{venueId}/pitches
+POST /api/pitches/{pitchId}/prices
+```
+
+Usecase `CreatePitchUseCase` co the nhan them danh sach `prices` de tao san con xong tao luon khung gia ban dau.
+
 Vai tro tung tang:
 
 ```text

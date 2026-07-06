@@ -325,6 +325,68 @@ class CreatePitchRequest {
   }
 }
 
+class PitchPrice {
+  const PitchPrice({
+    required this.id,
+    required this.pitchId,
+    required this.pitchName,
+    required this.startTime,
+    required this.endTime,
+    required this.pricePerHour,
+  });
+
+  final String id;
+  final String pitchId;
+  final String pitchName;
+  final String startTime;
+  final String endTime;
+  final num pricePerHour;
+}
+
+class PitchPriceModel extends PitchPrice {
+  const PitchPriceModel({
+    required super.id,
+    required super.pitchId,
+    required super.pitchName,
+    required super.startTime,
+    required super.endTime,
+    required super.pricePerHour,
+  });
+
+  factory PitchPriceModel.fromJson(Map<String, dynamic> json) {
+    return PitchPriceModel(
+      id: _string(json['id']),
+      pitchId: _string(json['pitchId']),
+      pitchName: _string(json['pitchName']),
+      startTime: _string(json['startTime']),
+      endTime: _string(json['endTime']),
+      pricePerHour: json['pricePerHour'] is num
+          ? json['pricePerHour'] as num
+          : 0,
+    );
+  }
+}
+
+class CreatePitchPriceRequest {
+  const CreatePitchPriceRequest({
+    required this.startTime,
+    required this.endTime,
+    required this.pricePerHour,
+  });
+
+  final String startTime;
+  final String endTime;
+  final num pricePerHour;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'startTime': startTime,
+      'endTime': endTime,
+      'pricePerHour': pricePerHour,
+    };
+  }
+}
+
 class Booking {
   const Booking({
     required this.id,
@@ -400,7 +462,6 @@ class CreateBookingRequest {
     required this.customerPhone,
     required this.startTime,
     required this.endTime,
-    required this.totalPrice,
     required this.note,
   });
 
@@ -409,7 +470,6 @@ class CreateBookingRequest {
   final String customerPhone;
   final DateTime startTime;
   final DateTime endTime;
-  final num totalPrice;
   final String note;
 
   Map<String, dynamic> toJson() {
@@ -419,7 +479,6 @@ class CreateBookingRequest {
       'customerPhone': customerPhone,
       'startTime': _toApiDateTime(startTime),
       'endTime': _toApiDateTime(endTime),
-      'totalPrice': totalPrice,
       'note': note,
     };
   }
@@ -436,10 +495,19 @@ class UpdateBookingStatusRequest {
 }
 
 class VenueDetailData {
-  const VenueDetailData({required this.venue, required this.pitches});
+  const VenueDetailData({
+    required this.venue,
+    required this.pitches,
+    this.pricesByPitch = const {},
+  });
 
   final Venue venue;
   final List<Pitch> pitches;
+  final Map<String, List<PitchPrice>> pricesByPitch;
+
+  List<PitchPrice> pricesOf(String pitchId) {
+    return pricesByPitch[pitchId] ?? const [];
+  }
 }
 
 String _string(Object? value, {String fallback = ''}) {

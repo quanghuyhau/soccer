@@ -139,6 +139,26 @@ class PitchDataSource {
 
     return PitchModel.fromJson(_resultObject(response.data));
   }
+
+  Future<List<PitchPriceModel>> getPitchPrices(String pitchId) async {
+    final json = await _apiClient.getJson('/api/pitches/$pitchId/prices');
+    return _resultList(
+      json,
+    ).map((item) => PitchPriceModel.fromJson(_asJsonObject(item))).toList();
+  }
+
+  Future<PitchPriceModel> createPitchPrice({
+    required String pitchId,
+    required CreatePitchPriceRequest request,
+  }) async {
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      '/api/pitches/$pitchId/prices',
+      data: request.toJson(),
+      parser: _asJsonObject,
+    );
+
+    return PitchPriceModel.fromJson(_resultObject(response.data));
+  }
 }
 
 class BookingDataSource {
