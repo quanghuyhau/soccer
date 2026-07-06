@@ -99,11 +99,7 @@ class BookingStatusController extends StateNotifier<AsyncValue<Booking?>> {
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() {
-      return _ref
-          .read(appUseCaseProvider)
-          .updateBookingStatus(
-            UpdateBookingStatusParams(bookingId: bookingId, status: status),
-          );
+      return _ref.read(appUseCaseProvider).updateBookingStatus(UpdateBookingStatusParams(bookingId: bookingId, status: status),);
     });
 
     _ref.invalidate(ownerDashboardControllerProvider);

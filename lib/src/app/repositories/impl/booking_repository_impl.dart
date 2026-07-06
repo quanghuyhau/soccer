@@ -35,8 +35,7 @@ class BookingRepositoryImpl extends BaseRepository
     required UpdateBookingStatusRequest request,
   }) {
     return guard(
-      () => _dataSource.updateBookingStatus(
-        bookingId: bookingId,
+      () => _dataSource.updateBookingStatus(bookingId: bookingId,
         request: request,
       ),
     );
