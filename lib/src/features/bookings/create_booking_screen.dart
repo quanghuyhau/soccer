@@ -34,7 +34,6 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
     text: AppFormatters.date(DateTime.now()),
   );
   final _startController = TextEditingController(text: '18:00');
-  final _endController = TextEditingController(text: '19:30');
   final _noteController = TextEditingController();
 
   @override
@@ -51,7 +50,6 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
     _phoneController.dispose();
     _dateController.dispose();
     _startController.dispose();
-    _endController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -121,12 +119,7 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
                       ),
                     ],
                   ),
-                  _field(
-                    _endController,
-                    'Kết thúc',
-                    Icons.schedule_send,
-                    onChanged: (_) => setState(() {}),
-                  ),
+                  _AutoEndTimeCard(endTime: _endTime()),
                   _PricePreviewCard(preview: preview, prices: widget.prices),
                   _field(_noteController, 'Ghi chú', Icons.notes, maxLines: 3),
                   const SizedBox(height: 4),
@@ -170,9 +163,8 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
   void _submit() {
     final date = _dateController.text.trim();
     final start = _startController.text.trim();
-    final end = _endController.text.trim();
     final startTime = _dateTimeAt(date, start);
-    final endTime = _dateTimeAt(date, end);
+    final endTime = _endTime();
 
     if (startTime == null || endTime == null) {
       ScaffoldMessenger.of(
@@ -205,9 +197,8 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
   _PricePreview _previewPrice() {
     final date = _dateController.text.trim();
     final start = _startController.text.trim();
-    final end = _endController.text.trim();
     final startTime = _dateTimeAt(date, start);
-    final endTime = _dateTimeAt(date, end);
+    final endTime = _endTime();
 
     if (widget.prices.isEmpty) {
       return const _PricePreview(
@@ -266,6 +257,15 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
     return DateTime.tryParse('${date}T$normalizedTime');
   }
 
+  DateTime? _endTime() {
+    final startTime = _dateTimeAt(
+      _dateController.text.trim(),
+      _startController.text.trim(),
+    );
+
+    return startTime?.add(const Duration(minutes: 90));
+  }
+
   String _errorMessage(Object error) {
     if (error is AppException) {
       if (error.message.contains('chưa được cấu hình giá')) {
@@ -284,6 +284,51 @@ class _PricePreview {
 
   final num? amount;
   final String message;
+}
+
+class _AutoEndTimeCard extends StatelessWidget {
+  const _AutoEndTimeCard({required this.endTime});
+
+  final DateTime? endTime;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: AppSurface(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            const Icon(Icons.schedule_send, color: AppColors.teal),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Kết thúc tự động',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: AppColors.muted),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    endTime == null
+                        ? 'Chọn giờ bắt đầu hợp lệ'
+                        : AppFormatters.time(endTime!),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const AppStatusPill(label: '+ 1h30p', color: AppColors.teal),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _PricePreviewCard extends StatelessWidget {

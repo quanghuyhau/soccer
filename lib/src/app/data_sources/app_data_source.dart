@@ -245,7 +245,7 @@ class BookingDataSource {
     required String bookingId,
     required UpdateBookingStatusRequest request,
   }) async {
-    final response = await _apiClient.patch<Map<String, dynamic>>(
+    final response = await _apiClient.put<Map<String, dynamic>>(
       '/api/bookings/$bookingId/status',
       data: request.toJson(),
       parser: _asJsonObject,
