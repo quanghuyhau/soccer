@@ -34,6 +34,21 @@ class PitchRepositoryImpl extends BaseRepository implements PitchRepository {
   }
 
   @override
+  Future<Pitch> updatePitch({
+    required String pitchId,
+    required CreatePitchRequest request,
+  }) {
+    return guard(
+      () => _dataSource.updatePitch(pitchId: pitchId, request: request),
+    );
+  }
+
+  @override
+  Future<void> deletePitch(String pitchId) {
+    return guard(() => _dataSource.deletePitch(pitchId));
+  }
+
+  @override
   Future<List<PitchPrice>> getPitchPrices(String pitchId) {
     return guard(() => _dataSource.getPitchPrices(pitchId));
   }

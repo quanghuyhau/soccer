@@ -55,6 +55,23 @@ class VenueDetailScreen extends ConsumerWidget {
       );
     });
 
+    ref.listen(pitchMutationControllerProvider, (previous, next) {
+      next.whenOrNull(
+        data: (value) {
+          if (value != null && previous?.isLoading == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Đã cập nhật sân con')),
+            );
+          }
+        },
+        error: (error, stackTrace) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(error.toString())));
+        },
+      );
+    });
+
     return BaseAsyncScreen<VenueDetailData>(
       title: 'Chi tiết sân',
       value: detailState,
@@ -251,6 +268,32 @@ class _PitchCard extends StatelessWidget {
                       pitchId: pitch.id,
                     ),
                   ),
+                if (canManagePrices)
+                  PopupMenuButton<_PitchAction>(
+                    tooltip: 'Tuỳ chọn sân con',
+                    onSelected: (action) {
+                      switch (action) {
+                        case _PitchAction.edit:
+                          _showAddPitchDialog(
+                            context: context,
+                            venueId: venue.id,
+                            pitch: pitch,
+                          );
+                        case _PitchAction.delete:
+                          _confirmDeletePitch(context, venue.id, pitch);
+                      }
+                    },
+                    itemBuilder: (_) => const [
+                      PopupMenuItem(
+                        value: _PitchAction.edit,
+                        child: Text('Sửa sân'),
+                      ),
+                      PopupMenuItem(
+                        value: _PitchAction.delete,
+                        child: Text('Xoá sân'),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ],
@@ -323,34 +366,84 @@ void _showAddPriceDialog({
 void _showAddPitchDialog({
   required BuildContext context,
   required String venueId,
+  Pitch? pitch,
 }) {
   showDialog<void>(
     context: context,
-    builder: (_) => _AddPitchDialog(venueId: venueId),
+    builder: (_) => _AddPitchDialog(venueId: venueId, pitch: pitch),
   );
 }
 
+enum _PitchAction { edit, delete }
+
+Future<void> _confirmDeletePitch(
+  BuildContext context,
+  String venueId,
+  Pitch pitch,
+) async {
+  final container = ProviderScope.containerOf(context);
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text('Xoá sân con?'),
+      content: Text('Bạn muốn xoá "${pitch.name}"?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Huỷ'),
+        ),
+        AppButton.destructive(
+          label: 'Xoá',
+          icon: const Icon(Icons.delete_outline),
+          onPressed: () => Navigator.of(context).pop(true),
+        ),
+      ],
+    ),
+  );
+
+  if (confirmed == true) {
+    container
+        .read(pitchMutationControllerProvider.notifier)
+        .delete(venueId: venueId, pitchId: pitch.id);
+  }
+}
+
 class _AddPitchDialog extends ConsumerStatefulWidget {
-  const _AddPitchDialog({required this.venueId});
+  const _AddPitchDialog({required this.venueId, this.pitch});
 
   final String venueId;
+  final Pitch? pitch;
 
   @override
   ConsumerState<_AddPitchDialog> createState() => _AddPitchDialogState();
 }
 
 class _AddPitchDialogState extends ConsumerState<_AddPitchDialog> {
-  final _codeController = TextEditingController(text: 'PITCH001');
-  final _nameController = TextEditingController(text: 'Sân 5A');
-  final _descriptionController = TextEditingController(
-    text: 'Sân bóng 5 người',
-  );
-  final _typeController = TextEditingController(text: 'FIVE');
-  final _sizeController = TextEditingController(text: '20x40m');
-  final _surfaceController = TextEditingController(text: 'Cỏ nhân tạo');
+  late final TextEditingController _codeController;
+  late final TextEditingController _nameController;
+  late final TextEditingController _descriptionController;
+  late final TextEditingController _typeController;
+  late final TextEditingController _sizeController;
+  late final TextEditingController _surfaceController;
   final _priceStartController = TextEditingController(text: '06:00:00');
   final _priceEndController = TextEditingController(text: '17:00:00');
   final _priceController = TextEditingController(text: '150000');
+
+  @override
+  void initState() {
+    super.initState();
+    final pitch = widget.pitch;
+    _codeController = TextEditingController(text: pitch?.code ?? 'PITCH001');
+    _nameController = TextEditingController(text: pitch?.name ?? 'Sân 5A');
+    _descriptionController = TextEditingController(
+      text: pitch?.description ?? 'Sân bóng 5 người',
+    );
+    _typeController = TextEditingController(text: pitch?.type ?? 'FIVE');
+    _sizeController = TextEditingController(text: pitch?.size ?? '20x40m');
+    _surfaceController = TextEditingController(
+      text: pitch?.surface ?? 'Cỏ nhân tạo',
+    );
+  }
 
   @override
   void dispose() {
@@ -369,9 +462,12 @@ class _AddPitchDialogState extends ConsumerState<_AddPitchDialog> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(createPitchControllerProvider);
+    final mutationState = ref.watch(pitchMutationControllerProvider);
+    final isEdit = widget.pitch != null;
+    final isLoading = state.isLoading || mutationState.isLoading;
 
     return AlertDialog(
-      title: const Text('Thêm sân con'),
+      title: Text(isEdit ? 'Sửa sân con' : 'Thêm sân con'),
       content: SizedBox(
         width: 420,
         child: SingleChildScrollView(
@@ -421,55 +517,57 @@ class _AddPitchDialogState extends ConsumerState<_AddPitchDialog> {
                 label: 'Mặt sân',
                 icon: Icons.eco_outlined,
               ),
-              const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Khung giá ban đầu',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+              if (!isEdit) ...[
+                const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Khung giá ban đầu',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppTextField(
-                      controller: _priceStartController,
-                      label: 'Bắt đầu',
-                      icon: Icons.schedule,
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppTextField(
+                        controller: _priceStartController,
+                        label: 'Bắt đầu',
+                        icon: Icons.schedule,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppTextField(
-                      controller: _priceEndController,
-                      label: 'Kết thúc',
-                      icon: Icons.schedule_send,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: AppTextField(
+                        controller: _priceEndController,
+                        label: 'Kết thúc',
+                        icon: Icons.schedule_send,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              AppTextField(
-                controller: _priceController,
-                label: 'Giá/giờ',
-                icon: Icons.payments_outlined,
-                keyboardType: TextInputType.number,
-              ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                AppTextField(
+                  controller: _priceController,
+                  label: 'Giá/giờ',
+                  icon: Icons.payments_outlined,
+                  keyboardType: TextInputType.number,
+                ),
+              ],
             ],
           ),
         ),
       ),
       actions: [
         TextButton(
-          onPressed: state.isLoading ? null : () => Navigator.of(context).pop(),
+          onPressed: isLoading ? null : () => Navigator.of(context).pop(),
           child: const Text('Huỷ'),
         ),
         AppButton.primary(
           label: 'Lưu',
-          isLoading: state.isLoading,
+          isLoading: isLoading,
           onPressed: _submit,
         ),
       ],
@@ -477,34 +575,44 @@ class _AddPitchDialogState extends ConsumerState<_AddPitchDialog> {
   }
 
   void _submit() {
+    final pitch = widget.pitch;
     final price = num.tryParse(_priceController.text.trim());
-    if (price == null || price <= 0) {
+    if (pitch == null && (price == null || price <= 0)) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Giá phải lớn hơn 0')));
       return;
     }
 
-    ref
-        .read(createPitchControllerProvider.notifier)
-        .create(
-          venueId: widget.venueId,
-          request: CreatePitchRequest(
-            code: _codeController.text.trim(),
-            name: _nameController.text.trim(),
-            description: _descriptionController.text.trim(),
-            type: _typeController.text.trim(),
-            size: _sizeController.text.trim(),
-            surface: _surfaceController.text.trim(),
-          ),
-          prices: [
-            CreatePitchPriceRequest(
-              startTime: _normalizeTime(_priceStartController.text),
-              endTime: _normalizeTime(_priceEndController.text),
-              pricePerHour: price,
-            ),
-          ],
-        );
+    final request = CreatePitchRequest(
+      code: _codeController.text.trim(),
+      name: _nameController.text.trim(),
+      description: _descriptionController.text.trim(),
+      type: _typeController.text.trim(),
+      size: _sizeController.text.trim(),
+      surface: _surfaceController.text.trim(),
+    );
+
+    if (pitch == null) {
+      ref
+          .read(createPitchControllerProvider.notifier)
+          .create(
+            venueId: widget.venueId,
+            request: request,
+            prices: [
+              CreatePitchPriceRequest(
+                startTime: _normalizeTime(_priceStartController.text),
+                endTime: _normalizeTime(_priceEndController.text),
+                pricePerHour: price!,
+              ),
+            ],
+          );
+    } else {
+      ref
+          .read(pitchMutationControllerProvider.notifier)
+          .update(venueId: widget.venueId, pitchId: pitch.id, request: request);
+    }
+
     Navigator.of(context).pop();
   }
 }

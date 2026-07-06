@@ -27,4 +27,19 @@ class VenueRepositoryImpl extends BaseRepository implements VenueRepository {
   Future<Venue> createVenue(CreateVenueRequest request) {
     return guard(() => _dataSource.createVenue(request));
   }
+
+  @override
+  Future<Venue> updateVenue({
+    required String venueId,
+    required CreateVenueRequest request,
+  }) {
+    return guard(
+      () => _dataSource.updateVenue(venueId: venueId, request: request),
+    );
+  }
+
+  @override
+  Future<void> deleteVenue(String venueId) {
+    return guard(() => _dataSource.deleteVenue(venueId));
+  }
 }

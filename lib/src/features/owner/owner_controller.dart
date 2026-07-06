@@ -34,11 +34,58 @@ final bookingStatusControllerProvider =
       return BookingStatusController(ref);
     });
 
+final venueMutationControllerProvider =
+    StateNotifierProvider.autoDispose<
+      VenueMutationController,
+      AsyncValue<Object?>
+    >((ref) {
+      return VenueMutationController(ref);
+    });
+
 class OwnerDashboardData {
   const OwnerDashboardData({required this.venues, required this.bookings});
 
   final List<Venue> venues;
   final List<Booking> bookings;
+}
+
+class VenueMutationController extends StateNotifier<AsyncValue<Object?>> {
+  VenueMutationController(this._ref) : super(const AsyncData(null));
+
+  final Ref _ref;
+
+  Future<void> create(CreateVenueRequest request) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() {
+      return _ref.read(appUseCaseProvider).createVenue(request);
+    });
+
+    _ref.invalidate(ownerDashboardControllerProvider);
+  }
+
+  Future<void> update({
+    required String venueId,
+    required CreateVenueRequest request,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() {
+      return _ref
+          .read(appUseCaseProvider)
+          .updateVenue(UpdateVenueParams(venueId: venueId, request: request));
+    });
+
+    _ref.invalidate(ownerDashboardControllerProvider);
+  }
+
+  Future<void> delete(String venueId) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await _ref.read(appUseCaseProvider).deleteVenue(venueId);
+      return true;
+    });
+
+    _ref.invalidate(ownerDashboardControllerProvider);
+  }
 }
 
 class BookingStatusController extends StateNotifier<AsyncValue<Booking?>> {

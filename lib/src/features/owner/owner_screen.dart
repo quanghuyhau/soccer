@@ -7,6 +7,7 @@ import '../../core/widgets/base_screen.dart';
 import '../bookings/my_bookings_screen.dart';
 import '../venues/venue_detail_screen.dart';
 import 'owner_controller.dart';
+import 'venue_dialog.dart';
 
 class OwnerScreen extends ConsumerWidget {
   const OwnerScreen({super.key});
@@ -15,6 +16,7 @@ class OwnerScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboardState = ref.watch(ownerDashboardControllerProvider);
     final statusState = ref.watch(bookingStatusControllerProvider);
+    final venueMutationState = ref.watch(venueMutationControllerProvider);
 
     ref.listen(bookingStatusControllerProvider, (previous, next) {
       next.whenOrNull(
@@ -33,12 +35,36 @@ class OwnerScreen extends ConsumerWidget {
       );
     });
 
+    ref.listen(venueMutationControllerProvider, (previous, next) {
+      next.whenOrNull(
+        data: (value) {
+          if (value != null && previous?.isLoading == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Đã cập nhật cụm sân')),
+            );
+          }
+        },
+        error: (error, stackTrace) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(error.toString())));
+        },
+      );
+    });
+
     return BaseAsyncScreen<OwnerDashboardData>(
       title: 'Quản lý',
       value: dashboardState,
       onRetry: () => ref.invalidate(ownerDashboardControllerProvider),
       onRefresh: () async => ref.invalidate(ownerDashboardControllerProvider),
       actions: [
+        IconButton(
+          tooltip: 'Thêm cụm sân',
+          onPressed: venueMutationState.isLoading
+              ? null
+              : () => showVenueDialog(context: context),
+          icon: const Icon(Icons.add_business),
+        ),
         IconButton(
           tooltip: 'Tải lại',
           onPressed: () => ref.invalidate(ownerDashboardControllerProvider),
@@ -81,6 +107,14 @@ class OwnerScreen extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
+            AppButton.primary(
+              label: 'Tạo cụm sân',
+              icon: const Icon(Icons.add_business),
+              isLoading: venueMutationState.isLoading,
+              isExpanded: true,
+              onPressed: () => showVenueDialog(context: context),
+            ),
+            const SizedBox(height: 12),
             if (dashboard.venues.isEmpty)
               const Card(
                 child: Padding(
@@ -105,11 +139,41 @@ class OwnerScreen extends ConsumerWidget {
                       leading: const Icon(Icons.stadium),
                       title: Text(venue.name),
                       subtitle: Text(venue.address),
-                      trailing: AppStatusPill(
-                        label: venue.status,
-                        color: venue.status == 'ACTIVE'
-                            ? AppColors.teal
-                            : AppColors.coral,
+                      trailing: Wrap(
+                        spacing: 6,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          AppStatusPill(
+                            label: venue.status,
+                            color: venue.status == 'ACTIVE'
+                                ? AppColors.teal
+                                : AppColors.coral,
+                          ),
+                          PopupMenuButton<_VenueAction>(
+                            tooltip: 'Tuỳ chọn',
+                            onSelected: (action) {
+                              switch (action) {
+                                case _VenueAction.edit:
+                                  showVenueDialog(
+                                    context: context,
+                                    venue: venue,
+                                  );
+                                case _VenueAction.delete:
+                                  confirmDeleteVenue(context, ref, venue);
+                              }
+                            },
+                            itemBuilder: (_) => const [
+                              PopupMenuItem(
+                                value: _VenueAction.edit,
+                                child: Text('Sửa'),
+                              ),
+                              PopupMenuItem(
+                                value: _VenueAction.delete,
+                                child: Text('Xoá'),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -178,3 +242,5 @@ class OwnerScreen extends ConsumerWidget {
         .update(bookingId: bookingId, status: status);
   }
 }
+
+enum _VenueAction { edit, delete }

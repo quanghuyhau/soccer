@@ -11,10 +11,14 @@ import 'bookings/update_booking_status_use_case.dart';
 import 'venues/create_pitch_price_use_case.dart';
 import 'venues/create_pitch_use_case.dart';
 import 'venues/create_venue_use_case.dart';
+import 'venues/delete_pitch_use_case.dart';
+import 'venues/delete_venue_use_case.dart';
 import 'venues/get_pitch_prices_use_case.dart';
 import 'venues/get_venue_detail_use_case.dart';
 import 'venues/get_venues_use_case.dart';
 import 'venues/get_venues_by_owner_use_case.dart';
+import 'venues/update_pitch_use_case.dart';
+import 'venues/update_venue_use_case.dart';
 
 export 'auth/get_current_user_use_case.dart';
 export 'auth/login_use_case.dart';
@@ -26,10 +30,14 @@ export 'bookings/update_booking_status_use_case.dart';
 export 'venues/create_pitch_price_use_case.dart';
 export 'venues/create_pitch_use_case.dart';
 export 'venues/create_venue_use_case.dart';
+export 'venues/delete_pitch_use_case.dart';
+export 'venues/delete_venue_use_case.dart';
 export 'venues/get_pitch_prices_use_case.dart';
 export 'venues/get_venue_detail_use_case.dart';
 export 'venues/get_venues_use_case.dart';
 export 'venues/get_venues_by_owner_use_case.dart';
+export 'venues/update_pitch_use_case.dart';
+export 'venues/update_venue_use_case.dart';
 
 final appUseCaseProvider = Provider<AppUseCase>((ref) {
   final repository = ref.watch(appRepositoryProvider);
@@ -45,7 +53,11 @@ final appUseCaseProvider = Provider<AppUseCase>((ref) {
     ),
     getVenuesByOwner: GetVenuesByOwnerUseCase(repository.venues),
     createVenue: CreateVenueUseCase(repository.venues),
+    updateVenue: UpdateVenueUseCase(repository.venues),
+    deleteVenue: DeleteVenueUseCase(repository.venues),
     createPitch: CreatePitchUseCase(repository.pitches),
+    updatePitch: UpdatePitchUseCase(repository.pitches),
+    deletePitch: DeletePitchUseCase(repository.pitches),
     getPitchPrices: GetPitchPricesUseCase(repository.pitches),
     createPitchPrice: CreatePitchPriceUseCase(repository.pitches),
     createBooking: CreateBookingUseCase(repository.bookings),
@@ -64,7 +76,11 @@ class AppUseCase {
     required this.getVenueDetail,
     required this.getVenuesByOwner,
     required this.createVenue,
+    required this.updateVenue,
+    required this.deleteVenue,
     required this.createPitch,
+    required this.updatePitch,
+    required this.deletePitch,
     required this.getPitchPrices,
     required this.createPitchPrice,
     required this.createBooking,
@@ -80,7 +96,11 @@ class AppUseCase {
   final GetVenueDetailUseCase getVenueDetail;
   final GetVenuesByOwnerUseCase getVenuesByOwner;
   final CreateVenueUseCase createVenue;
+  final UpdateVenueUseCase updateVenue;
+  final DeleteVenueUseCase deleteVenue;
   final CreatePitchUseCase createPitch;
+  final UpdatePitchUseCase updatePitch;
+  final DeletePitchUseCase deletePitch;
   final GetPitchPricesUseCase getPitchPrices;
   final CreatePitchPriceUseCase createPitchPrice;
   final CreateBookingUseCase createBooking;

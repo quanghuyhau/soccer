@@ -101,6 +101,28 @@ class VenueDataSource {
 
     return VenueModel.fromJson(_resultObject(response.data));
   }
+
+  Future<VenueModel> updateVenue({
+    required String venueId,
+    required CreateVenueRequest request,
+  }) async {
+    final response = await _apiClient.put<Map<String, dynamic>>(
+      '/api/venues/$venueId',
+      data: request.toJson(),
+      parser: _asJsonObject,
+    );
+
+    return VenueModel.fromJson(_resultObject(response.data));
+  }
+
+  Future<void> deleteVenue(String venueId) async {
+    final response = await _apiClient.delete<Map<String, dynamic>>(
+      '/api/venues/$venueId',
+      parser: _asJsonObject,
+    );
+
+    _ensureSuccess(response.data);
+  }
 }
 
 class PitchDataSource {
@@ -138,6 +160,28 @@ class PitchDataSource {
     );
 
     return PitchModel.fromJson(_resultObject(response.data));
+  }
+
+  Future<PitchModel> updatePitch({
+    required String pitchId,
+    required CreatePitchRequest request,
+  }) async {
+    final response = await _apiClient.put<Map<String, dynamic>>(
+      '/api/pitches/$pitchId',
+      data: request.toJson(),
+      parser: _asJsonObject,
+    );
+
+    return PitchModel.fromJson(_resultObject(response.data));
+  }
+
+  Future<void> deletePitch(String pitchId) async {
+    final response = await _apiClient.delete<Map<String, dynamic>>(
+      '/api/pitches/$pitchId',
+      parser: _asJsonObject,
+    );
+
+    _ensureSuccess(response.data);
   }
 
   Future<List<PitchPriceModel>> getPitchPrices(String pitchId) async {
@@ -255,4 +299,16 @@ List<dynamic> _resultList(Map<String, dynamic> envelope) {
   }
 
   throw const ParsingException('API result is not a JSON array.');
+}
+
+void _ensureSuccess(Map<String, dynamic> envelope) {
+  final code = envelope['code'];
+  final message = envelope['message'];
+
+  if (code is int && code >= 400) {
+    throw ServerException(
+      message is String ? message : 'Request failed.',
+      statusCode: code,
+    );
+  }
 }

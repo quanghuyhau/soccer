@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/models/app_models.dart';
+import '../../app/session/app_session.dart';
+import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_design.dart';
 import '../../core/widgets/base_screen.dart';
+import '../owner/owner_controller.dart';
+import '../owner/venue_dialog.dart';
 import 'venue_detail_screen.dart';
 import 'venues_controller.dart';
 
@@ -27,6 +31,27 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
   @override
   Widget build(BuildContext context) {
     final venuesState = ref.watch(venuesControllerProvider);
+    final venueMutationState = ref.watch(venueMutationControllerProvider);
+    final user = ref.watch(appSessionProvider)?.user;
+    final canCreateVenue = user?.isOwner == true;
+
+    ref.listen(venueMutationControllerProvider, (previous, next) {
+      next.whenOrNull(
+        data: (value) {
+          if (value != null && previous?.isLoading == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Đã cập nhật cụm sân')),
+            );
+            ref.invalidate(venuesControllerProvider);
+          }
+        },
+        error: (error, stackTrace) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(error.toString())));
+        },
+      );
+    });
 
     return BaseAsyncScreen<List<Venue>>(
       title: 'Cụm sân',
@@ -34,6 +59,14 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       onRetry: () => ref.invalidate(venuesControllerProvider),
       onRefresh: () async => ref.invalidate(venuesControllerProvider),
       actions: [
+        if (canCreateVenue)
+          IconButton(
+            tooltip: 'Tạo cụm sân',
+            onPressed: venueMutationState.isLoading
+                ? null
+                : () => showVenueDialog(context: context),
+            icon: const Icon(Icons.add_business),
+          ),
         IconButton(
           tooltip: 'Tải lại',
           onPressed: () => ref.invalidate(venuesControllerProvider),
@@ -80,6 +113,16 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
               ],
             ),
             const SizedBox(height: 12),
+            if (canCreateVenue) ...[
+              AppButton.primary(
+                label: 'Tạo cụm sân',
+                icon: const Icon(Icons.add_business),
+                isLoading: venueMutationState.isLoading,
+                isExpanded: true,
+                onPressed: () => showVenueDialog(context: context),
+              ),
+              const SizedBox(height: 12),
+            ],
             GridView.count(
               crossAxisCount: 3,
               shrinkWrap: true,

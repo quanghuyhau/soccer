@@ -29,6 +29,14 @@ final createPitchControllerProvider =
       return CreatePitchController(ref);
     });
 
+final pitchMutationControllerProvider =
+    StateNotifierProvider.autoDispose<
+      PitchMutationController,
+      AsyncValue<Object?>
+    >((ref) {
+      return PitchMutationController(ref);
+    });
+
 class CreatePitchController extends StateNotifier<AsyncValue<Pitch?>> {
   CreatePitchController(this._ref) : super(const AsyncData(null));
 
@@ -50,6 +58,40 @@ class CreatePitchController extends StateNotifier<AsyncValue<Pitch?>> {
               prices: prices,
             ),
           );
+    });
+
+    _ref.invalidate(venueDetailControllerProvider(venueId));
+  }
+}
+
+class PitchMutationController extends StateNotifier<AsyncValue<Object?>> {
+  PitchMutationController(this._ref) : super(const AsyncData(null));
+
+  final Ref _ref;
+
+  Future<void> update({
+    required String venueId,
+    required String pitchId,
+    required CreatePitchRequest request,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() {
+      return _ref
+          .read(appUseCaseProvider)
+          .updatePitch(UpdatePitchParams(pitchId: pitchId, request: request));
+    });
+
+    _ref.invalidate(venueDetailControllerProvider(venueId));
+  }
+
+  Future<void> delete({
+    required String venueId,
+    required String pitchId,
+  }) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await _ref.read(appUseCaseProvider).deletePitch(pitchId);
+      return true;
     });
 
     _ref.invalidate(venueDetailControllerProvider(venueId));
