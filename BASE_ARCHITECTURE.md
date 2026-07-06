@@ -74,6 +74,77 @@ lib/src/core/
   widgets/
 ```
 
+## Base screen dung chung
+
+Tat ca man hinh moi nen dung cac widget trong:
+
+```text
+lib/src/core/widgets/base_screen.dart
+```
+
+Co 3 loai:
+
+```text
+BaseScreen       -> man tuy bien body, form, detail
+BaseScrollScreen -> man list tinh co padding/refresh
+BaseAsyncScreen  -> man doc AsyncValue, tu co loading/error/data
+```
+
+`BaseScreen` la khung giao dien goc cua app. No quan ly:
+
+```text
+Scaffold
+AppBar
+SafeArea
+Padding
+BottomNavigationBar
+nen san bong phia sau
+```
+
+Vi vay feature khong nen tu tao `Scaffold` neu khong that su can. Muon doi nen, mau appbar, padding mac dinh cua toan app thi sua o:
+
+```text
+lib/src/core/widgets/base_screen.dart
+```
+
+Vi du man load data:
+
+```dart
+return BaseAsyncScreen<List<Venue>>(
+  title: 'Cụm sân',
+  value: venuesState,
+  onRetry: () => ref.invalidate(venuesControllerProvider),
+  data: (venues) {
+    return ListView(...);
+  },
+);
+```
+
+Vi du man form:
+
+```dart
+return BaseScreen(
+  title: 'Tạo booking',
+  padding: EdgeInsets.zero,
+  body: ListView(
+    padding: const EdgeInsets.all(20),
+    children: [...],
+  ),
+);
+```
+
+Neu man can nen rieng:
+
+```dart
+return BaseScreen(
+  title: 'Tạo cửa hàng',
+  background: const BasePitchBackground(compact: true),
+  body: ...
+);
+```
+
+Khong nen tao `Scaffold` moi trong feature neu `BaseScreen` dap ung duoc.
+
 ## Luong call API
 
 Vi du tao booking:
@@ -204,7 +275,8 @@ BlocListener          ref.listen
 ## Man hinh da co
 
 ```text
-AuthScreen       -> login/register
+LoginScreen      -> login
+RegisterScreen   -> register
 MainShell        -> bottom navigation
 VenuesScreen     -> GET /api/venues
 VenueDetail      -> GET /api/venues/{id}, GET /api/venues/{id}/pitches

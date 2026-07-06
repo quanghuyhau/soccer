@@ -6,6 +6,8 @@ import '../../app/session/app_session.dart';
 import '../../core/error/app_exception.dart';
 import '../../core/utils/app_formatters.dart';
 import '../../core/widgets/app_button.dart';
+import '../../core/widgets/app_design.dart';
+import '../../core/widgets/base_screen.dart';
 import 'bookings_controller.dart';
 
 class CreateBookingScreen extends ConsumerStatefulWidget {
@@ -78,48 +80,61 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
       );
     });
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Tạo booking')),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            Text(
-              widget.pitch.name,
-              style: Theme.of(context).textTheme.headlineSmall,
+    return BaseScreen(
+      title: 'Tạo booking',
+      padding: EdgeInsets.zero,
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          AppHeroPanel(
+            title: widget.pitch.name,
+            subtitle: widget.venue.name,
+            icon: Icons.add_task,
+          ),
+          const SizedBox(height: 16),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _field(_nameController, 'Tên khách hàng', Icons.person),
+                  _field(_phoneController, 'Số điện thoại', Icons.phone),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _field(_dateController, 'Ngày', Icons.today),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _field(
+                          _startController,
+                          'Bắt đầu',
+                          Icons.schedule,
+                        ),
+                      ),
+                    ],
+                  ),
+                  _field(_endController, 'Kết thúc', Icons.schedule_send),
+                  _field(
+                    _priceController,
+                    'Tổng tiền',
+                    Icons.payments_outlined,
+                    keyboardType: TextInputType.number,
+                  ),
+                  _field(_noteController, 'Ghi chú', Icons.notes, maxLines: 3),
+                  const SizedBox(height: 4),
+                  AppButton.primary(
+                    label: 'Xác nhận đặt sân',
+                    icon: const Icon(Icons.check_circle_outline),
+                    isLoading: createState.isLoading,
+                    isExpanded: true,
+                    onPressed: _submit,
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 4),
-            Text(widget.venue.name),
-            const SizedBox(height: 20),
-            _field(_nameController, 'Tên khách hàng', Icons.person),
-            _field(_phoneController, 'Số điện thoại', Icons.phone),
-            Row(
-              children: [
-                Expanded(child: _field(_dateController, 'Ngày', Icons.today)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _field(_startController, 'Bắt đầu', Icons.schedule),
-                ),
-              ],
-            ),
-            _field(_endController, 'Kết thúc', Icons.schedule_send),
-            _field(
-              _priceController,
-              'Tổng tiền',
-              Icons.payments_outlined,
-              keyboardType: TextInputType.number,
-            ),
-            _field(_noteController, 'Ghi chú', Icons.notes, maxLines: 3),
-            const SizedBox(height: 12),
-            AppButton.primary(
-              label: 'Xác nhận đặt sân',
-              icon: const Icon(Icons.check_circle_outline),
-              isLoading: createState.isLoading,
-              isExpanded: true,
-              onPressed: _submit,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -133,15 +148,12 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: TextField(
+      child: AppTextField(
         controller: controller,
+        label: label,
+        icon: icon,
         keyboardType: keyboardType,
         maxLines: maxLines,
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon),
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
       ),
     );
   }

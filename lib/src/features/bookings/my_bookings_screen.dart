@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/models/app_models.dart';
 import '../../core/utils/app_formatters.dart';
-import '../../core/widgets/app_state_views.dart';
+import '../../core/widgets/app_design.dart';
+import '../../core/widgets/base_screen.dart';
 import 'bookings_controller.dart';
 
 class MyBookingsScreen extends ConsumerWidget {
@@ -13,40 +14,69 @@ class MyBookingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bookingsState = ref.watch(myBookingsControllerProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lịch đặt của tôi'),
-        actions: [
-          IconButton(
-            tooltip: 'Tải lại',
-            onPressed: () => ref.invalidate(myBookingsControllerProvider),
-            icon: const Icon(Icons.refresh),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: bookingsState.when(
-          data: (bookings) {
-            if (bookings.isEmpty) {
-              return const Center(child: Text('Chưa có booking'));
-            }
-
-            return ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: bookings.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                return BookingCard(booking: bookings[index]);
-              },
-            );
-          },
-          error: (error, stackTrace) => AppErrorView(
-            message: error.toString(),
-            onRetry: () => ref.invalidate(myBookingsControllerProvider),
-          ),
-          loading: () => const AppLoadingView(),
+    return BaseAsyncScreen<List<Booking>>(
+      title: 'Lịch đặt của tôi',
+      value: bookingsState,
+      onRetry: () => ref.invalidate(myBookingsControllerProvider),
+      actions: [
+        IconButton(
+          tooltip: 'Tải lại',
+          onPressed: () => ref.invalidate(myBookingsControllerProvider),
+          icon: const Icon(Icons.refresh),
         ),
-      ),
+      ],
+      data: (bookings) {
+        final pending = bookings
+            .where((booking) => booking.status == 'PENDING')
+            .length;
+
+        return ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            const AppHeroPanel(
+              title: 'Lịch đặt của tôi',
+              subtitle: 'Theo dõi lịch và trạng thái đặt sân',
+              icon: Icons.event_available,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: AppMetricBubble(
+                    icon: Icons.confirmation_number_outlined,
+                    label: 'Tổng booking',
+                    value: bookings.length.toString(),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: AppMetricBubble(
+                    icon: Icons.pending_actions,
+                    label: 'Đang chờ',
+                    value: pending.toString(),
+                    color: AppColors.amber,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (bookings.isEmpty)
+              const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('Chưa có booking'),
+                ),
+              )
+            else
+              ...bookings.map(
+                (booking) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: BookingCard(booking: booking),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -70,21 +100,32 @@ class BookingCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(Icons.event_note, color: statusColor),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    booking.pitchName,
-                    style: Theme.of(context).textTheme.titleMedium,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        booking.pitchName,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(booking.venueName),
+                    ],
                   ),
                 ),
-                Chip(
-                  label: Text(booking.status),
-                  side: BorderSide(color: statusColor),
-                  labelStyle: TextStyle(color: statusColor),
-                ),
+                AppStatusPill(label: booking.status, color: statusColor),
               ],
             ),
-            const SizedBox(height: 6),
-            Text(booking.venueName),
             const SizedBox(height: 12),
             Row(
               children: [

@@ -2,54 +2,134 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/models/app_models.dart';
-import '../../core/widgets/app_state_views.dart';
+import '../../core/widgets/app_design.dart';
+import '../../core/widgets/base_screen.dart';
 import 'venue_detail_screen.dart';
 import 'venues_controller.dart';
 
-class VenuesScreen extends ConsumerWidget {
+class VenuesScreen extends ConsumerStatefulWidget {
   const VenuesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<VenuesScreen> createState() => _VenuesScreenState();
+}
+
+class _VenuesScreenState extends ConsumerState<VenuesScreen> {
+  final _searchController = TextEditingController();
+  var _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final venuesState = ref.watch(venuesControllerProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cụm sân'),
-        actions: [
-          IconButton(
-            tooltip: 'Tải lại',
-            onPressed: () => ref.invalidate(venuesControllerProvider),
-            icon: const Icon(Icons.refresh),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: venuesState.when(
-          data: (venues) {
-            if (venues.isEmpty) {
-              return const _EmptyVenues();
-            }
-
-            return RefreshIndicator(
-              onRefresh: () async => ref.invalidate(venuesControllerProvider),
-              child: ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: venues.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  return _VenueCard(venue: venues[index]);
-                },
-              ),
-            );
-          },
-          error: (error, stackTrace) => AppErrorView(
-            message: error.toString(),
-            onRetry: () => ref.invalidate(venuesControllerProvider),
-          ),
-          loading: () => const AppLoadingView(),
+    return BaseAsyncScreen<List<Venue>>(
+      title: 'Cụm sân',
+      value: venuesState,
+      onRetry: () => ref.invalidate(venuesControllerProvider),
+      onRefresh: () async => ref.invalidate(venuesControllerProvider),
+      actions: [
+        IconButton(
+          tooltip: 'Tải lại',
+          onPressed: () => ref.invalidate(venuesControllerProvider),
+          icon: const Icon(Icons.refresh),
         ),
-      ),
+      ],
+      data: (venues) {
+        final filtered = venues.where((venue) {
+          final query = _query.toLowerCase();
+          return venue.name.toLowerCase().contains(query) ||
+              venue.address.toLowerCase().contains(query);
+        }).toList();
+
+        return ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            const AppHeroPanel(
+              title: 'Tìm sân phù hợp',
+              subtitle: 'Chọn cụm sân, xem sân con và đặt lịch',
+              icon: Icons.stadium,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: AppMetricBubble(
+                    icon: Icons.location_city,
+                    label: 'Cụm sân',
+                    value: venues.length.toString(),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: AppMetricBubble(
+                    icon: Icons.grass,
+                    label: 'Sẵn sàng',
+                    value: venues
+                        .where((venue) => venue.status == 'ACTIVE')
+                        .length
+                        .toString(),
+                    color: AppColors.coral,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 0.95,
+              children: [
+                AppQuickActionTile(
+                  icon: Icons.flash_on,
+                  label: 'Đặt nhanh',
+                  color: AppColors.coral,
+                  onTap: filtered.isEmpty
+                      ? null
+                      : () => _openVenue(context, filtered.first),
+                ),
+                AppQuickActionTile(
+                  icon: Icons.near_me,
+                  label: 'Gần bạn',
+                  color: AppColors.teal,
+                  onTap: null,
+                ),
+                AppQuickActionTile(
+                  icon: Icons.history,
+                  label: 'Gần đây',
+                  color: AppColors.amber,
+                  onTap: null,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: _searchController,
+              label: 'Tìm theo tên hoặc địa chỉ',
+              icon: Icons.search,
+              onChanged: (value) => setState(() => _query = value),
+            ),
+            const SizedBox(height: 16),
+            if (filtered.isEmpty)
+              const _EmptyVenues()
+            else
+              ...filtered.map((venue) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _VenueCard(venue: venue),
+                );
+              }),
+          ],
+        );
+      },
     );
   }
 }
@@ -65,11 +145,7 @@ class _VenueCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => VenueDetailScreen(venueId: venue.id),
-            ),
-          );
+          _openVenue(context, venue);
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -77,18 +153,37 @@ class _VenueCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.tertiaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.sports_soccer,
+                      color: Theme.of(context).colorScheme.onTertiaryContainer,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      venue.name,
-                      style: Theme.of(context).textTheme.titleMedium,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          venue.name,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(venue.address),
+                      ],
                     ),
                   ),
                   const Icon(Icons.chevron_right),
                 ],
               ),
-              const SizedBox(height: 8),
-              Text(venue.address),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
@@ -102,7 +197,12 @@ class _VenueCard extends StatelessWidget {
                     avatar: const Icon(Icons.phone, size: 18),
                     label: Text(venue.phone),
                   ),
-                  Chip(label: Text(venue.status)),
+                  AppStatusPill(
+                    label: venue.status,
+                    color: venue.status == 'ACTIVE'
+                        ? AppColors.teal
+                        : AppColors.coral,
+                  ),
                 ],
               ),
             ],
@@ -111,6 +211,14 @@ class _VenueCard extends StatelessWidget {
       ),
     );
   }
+}
+
+void _openVenue(BuildContext context, Venue venue) {
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => VenueDetailScreen(venueId: venue.id),
+    ),
+  );
 }
 
 class _EmptyVenues extends StatelessWidget {

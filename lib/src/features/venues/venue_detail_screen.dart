@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/models/app_models.dart';
+import '../../core/widgets/app_design.dart';
 import '../../core/widgets/app_button.dart';
-import '../../core/widgets/app_state_views.dart';
+import '../../core/widgets/base_screen.dart';
 import '../bookings/create_booking_screen.dart';
 import 'venues_controller.dart';
 
@@ -16,30 +17,22 @@ class VenueDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detailState = ref.watch(venueDetailControllerProvider(venueId));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chi tiết sân'),
-        actions: [
-          IconButton(
-            tooltip: 'Tải lại',
-            onPressed: () {
-              ref.invalidate(venueDetailControllerProvider(venueId));
-            },
-            icon: const Icon(Icons.refresh),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: detailState.when(
-          data: (detail) => _VenueDetail(detail: detail),
-          error: (error, stackTrace) => AppErrorView(
-            message: error.toString(),
-            onRetry: () =>
-                ref.invalidate(venueDetailControllerProvider(venueId)),
-          ),
-          loading: () => const AppLoadingView(),
+    return BaseAsyncScreen<VenueDetailData>(
+      title: 'Chi tiết sân',
+      value: detailState,
+      onRetry: () => ref.invalidate(venueDetailControllerProvider(venueId)),
+      onRefresh: () async =>
+          ref.invalidate(venueDetailControllerProvider(venueId)),
+      actions: [
+        IconButton(
+          tooltip: 'Tải lại',
+          onPressed: () {
+            ref.invalidate(venueDetailControllerProvider(venueId));
+          },
+          icon: const Icon(Icons.refresh),
         ),
-      ),
+      ],
+      data: (detail) => _VenueDetail(detail: detail),
     );
   }
 }
@@ -56,10 +49,16 @@ class _VenueDetail extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text(venue.name, style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 8),
-        Text(venue.description),
-        const SizedBox(height: 16),
+        AppHeroPanel(
+          title: venue.name,
+          subtitle: venue.address,
+          icon: Icons.stadium,
+        ),
+        if (venue.description.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(venue.description),
+        ],
+        const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -74,7 +73,14 @@ class _VenueDetail extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
+        AppMetricBubble(
+          icon: Icons.sports_soccer,
+          label: 'Sân con',
+          value: detail.pitches.length.toString(),
+          color: AppColors.coral,
+        ),
+        const SizedBox(height: 20),
         Text('Sân con', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 12),
         if (detail.pitches.isEmpty)
@@ -111,20 +117,47 @@ class _PitchCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.grass,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     pitch.name,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
-                Chip(label: Text(pitch.type)),
+                AppStatusPill(label: pitch.type, color: AppColors.teal),
               ],
             ),
-            const SizedBox(height: 8),
-            Text('${pitch.size} - ${pitch.surface}'),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                Chip(
+                  avatar: const Icon(Icons.straighten, size: 18),
+                  label: Text(pitch.size),
+                ),
+                Chip(
+                  avatar: const Icon(Icons.eco_outlined, size: 18),
+                  label: Text(pitch.surface),
+                ),
+              ],
+            ),
             if (pitch.description.isNotEmpty) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Text(pitch.description),
             ],
             const SizedBox(height: 12),

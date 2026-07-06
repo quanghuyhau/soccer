@@ -99,13 +99,19 @@ class AppButton extends StatelessWidget {
   ButtonStyle? _styleOf(BuildContext context) {
     final foregroundColor = Theme.of(context).colorScheme.onError;
     final backgroundColor = Theme.of(context).colorScheme.error;
+    final baseStyle = ButtonStyle(
+      minimumSize: const WidgetStatePropertyAll(Size(48, 48)),
+      shape: WidgetStatePropertyAll(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
 
     return switch (variant) {
       AppButtonVariant.destructive => FilledButton.styleFrom(
         foregroundColor: foregroundColor,
         backgroundColor: backgroundColor,
-      ),
-      _ => null,
+      ).merge(baseStyle),
+      _ => baseStyle,
     };
   }
 }

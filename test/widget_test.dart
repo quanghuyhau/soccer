@@ -8,6 +8,6 @@ void main() {
 
     expect(find.text('Pitch Manager'), findsOneWidget);
     expect(find.text('Đăng nhập'), findsOneWidget);
-    expect(find.text('Vào hệ thống'), findsOneWidget);
+    expect(find.text('Tạo tài khoản mới'), findsOneWidget);
   });
 }

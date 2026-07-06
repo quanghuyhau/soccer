@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/session/app_session.dart';
 import '../shell/main_shell.dart';
-import 'auth_screen.dart';
+import 'login_screen.dart';
 
 class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});
@@ -13,7 +13,7 @@ class AuthGate extends ConsumerWidget {
     final session = ref.watch(appSessionProvider);
 
     if (session == null) {
-      return const AuthScreen();
+      return const LoginScreen();
     }
 
     return const MainShell();
