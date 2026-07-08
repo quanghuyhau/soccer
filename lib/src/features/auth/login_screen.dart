@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/error/app_exception.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_design.dart';
+import '../../core/widgets/app_feedback.dart';
 import 'auth_controller.dart';
 import 'auth_layout.dart';
 import 'register_screen.dart';
@@ -29,13 +29,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
-
     ref.listen(authControllerProvider, (previous, next) {
       next.whenOrNull(
         error: (error, stackTrace) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(_errorMessage(error))));
+          AppToast.error(context, error);
         },
       );
     });
@@ -96,13 +93,5 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           username: _usernameController.text,
           password: _passwordController.text,
         );
-  }
-
-  String _errorMessage(Object error) {
-    if (error is AppException) {
-      return error.message;
-    }
-
-    return 'Đăng nhập không thành công';
   }
 }

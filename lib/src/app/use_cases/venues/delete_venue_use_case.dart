@@ -5,7 +5,7 @@ class DeleteVenueUseCase {
 
   final VenueRepository _repository;
 
-  Future<void> call(String venueId) {
+  Future<void> deleteVenue(String venueId) {
     return _repository.deleteVenue(venueId);
   }
 }

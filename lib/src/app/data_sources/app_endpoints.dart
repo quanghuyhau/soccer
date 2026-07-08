@@ -11,8 +11,10 @@ class AppEndpoints {
 
   static const pitches = '/api/pitches';
   static String pitch(String pitchId) => '/api/pitches/$pitchId';
-  static String pitchesByVenue(String venueId) => '/api/venues/$venueId/pitches';
-  static String pitchBookings(String pitchId) => '/api/pitches/$pitchId/bookings';
+  static String pitchesByVenue(String venueId) =>
+      '/api/venues/$venueId/pitches';
+  static String pitchBookings(String pitchId) =>
+      '/api/pitches/$pitchId/bookings';
   static String pitchPrices(String pitchId) => '/api/pitches/$pitchId/prices';
   static String pitchPrice(String priceId) => '/api/pitch-prices/$priceId';
 

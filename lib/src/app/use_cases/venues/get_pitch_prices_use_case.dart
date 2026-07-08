@@ -6,7 +6,7 @@ class GetPitchPricesUseCase {
 
   final PitchRepository _repository;
 
-  Future<List<PitchPrice>> call(String pitchId) {
+  Future<List<PitchPrice>> getPitchPrices(String pitchId) {
     return _repository.getPitchPrices(pitchId);
   }
 }

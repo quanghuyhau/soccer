@@ -10,22 +10,24 @@ class VenueRepositoryImpl extends BaseRepository implements VenueRepository {
 
   @override
   Future<List<Venue>> getVenues() {
-    return guard(_dataSource.getVenues);
+    return executeDataSourceRequest(_dataSource.getVenues);
   }
 
   @override
   Future<Venue> getVenue(String venueId) {
-    return guard(() => _dataSource.getVenue(venueId));
+    return executeDataSourceRequest(() => _dataSource.getVenue(venueId));
   }
 
   @override
   Future<List<Venue>> getVenuesByOwner(String ownerId) {
-    return guard(() => _dataSource.getVenuesByOwner(ownerId));
+    return executeDataSourceRequest(
+      () => _dataSource.getVenuesByOwner(ownerId),
+    );
   }
 
   @override
   Future<Venue> createVenue(CreateVenueRequest request) {
-    return guard(() => _dataSource.createVenue(request));
+    return executeDataSourceRequest(() => _dataSource.createVenue(request));
   }
 
   @override
@@ -33,13 +35,13 @@ class VenueRepositoryImpl extends BaseRepository implements VenueRepository {
     required String venueId,
     required CreateVenueRequest request,
   }) {
-    return guard(
+    return executeDataSourceRequest(
       () => _dataSource.updateVenue(venueId: venueId, request: request),
     );
   }
 
   @override
   Future<void> deleteVenue(String venueId) {
-    return guard(() => _dataSource.deleteVenue(venueId));
+    return executeDataSourceRequest(() => _dataSource.deleteVenue(venueId));
   }
 }

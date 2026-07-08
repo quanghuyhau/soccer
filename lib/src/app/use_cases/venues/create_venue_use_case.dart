@@ -6,7 +6,7 @@ class CreateVenueUseCase {
 
   final VenueRepository _repository;
 
-  Future<Venue> call(CreateVenueRequest request) {
+  Future<Venue> createVenue(CreateVenueRequest request) {
     return _repository.createVenue(request);
   }
 }

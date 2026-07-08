@@ -10,16 +10,18 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
 
   @override
   Future<AuthTokens> login(LoginRequest request) {
-    return guard(() => _dataSource.login(request));
+    return executeDataSourceRequest(() => _dataSource.login(request));
   }
 
   @override
   Future<AppUser> register(RegisterRequest request) {
-    return guard(() => _dataSource.register(request));
+    return executeDataSourceRequest(() => _dataSource.register(request));
   }
 
   @override
   Future<AppUser> getCurrentUser({String? accessToken}) {
-    return guard(() => _dataSource.getCurrentUser(accessToken: accessToken));
+    return executeDataSourceRequest(
+      () => _dataSource.getCurrentUser(accessToken: accessToken),
+    );
   }
 }

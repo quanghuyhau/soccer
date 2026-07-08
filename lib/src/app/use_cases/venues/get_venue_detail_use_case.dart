@@ -12,7 +12,7 @@ class GetVenueDetailUseCase {
   final VenueRepository _venueRepository;
   final PitchRepository _pitchRepository;
 
-  Future<VenueDetailData> call(String venueId) async {
+  Future<VenueDetailData> getVenueDetail(String venueId) async {
     final venue = await _venueRepository.getVenue(venueId);
     final pitches = await _pitchRepository.getPitchesByVenue(venueId);
     final prices = await Future.wait(

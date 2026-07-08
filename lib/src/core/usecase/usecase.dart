@@ -1,5 +1,5 @@
 abstract interface class UseCase<Output, Input> {
-  Future<Output> call(Input input);
+  Future<Output> execute(Input input);
 }
 
 class NoParams {

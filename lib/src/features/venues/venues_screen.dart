@@ -5,6 +5,7 @@ import '../../app/models/app_models.dart';
 import '../../app/session/app_session.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_design.dart';
+import '../../core/widgets/app_feedback.dart';
 import '../../core/widgets/base_screen.dart';
 import '../owner/owner_controller.dart';
 import '../owner/venue_dialog.dart';
@@ -39,16 +40,12 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       next.whenOrNull(
         data: (value) {
           if (value != null && previous?.isLoading == true) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Đã cập nhật cụm sân')),
-            );
+            AppToast.success(context, 'Đã cập nhật cụm sân');
             ref.invalidate(venuesControllerProvider);
           }
         },
         error: (error, stackTrace) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(error.toString())));
+          AppToast.error(context, error);
         },
       );
     });

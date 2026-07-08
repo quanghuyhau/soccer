@@ -13,7 +13,7 @@ class CreatePitchPriceUseCase {
 
   final PitchRepository _repository;
 
-  Future<PitchPrice> call(CreatePitchPriceParams params) {
+  Future<PitchPrice> createPitchPrice(CreatePitchPriceParams params) {
     return _repository.createPitchPrice(
       pitchId: params.pitchId,
       request: params.request,

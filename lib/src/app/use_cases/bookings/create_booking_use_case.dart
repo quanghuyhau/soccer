@@ -6,7 +6,7 @@ class CreateBookingUseCase {
 
   final BookingRepository _repository;
 
-  Future<Booking> call(CreateBookingRequest request) {
+  Future<Booking> createBooking(CreateBookingRequest request) {
     return _repository.createBooking(request);
   }
 }

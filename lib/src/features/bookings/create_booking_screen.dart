@@ -7,6 +7,7 @@ import '../../core/error/app_exception.dart';
 import '../../core/utils/app_formatters.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_design.dart';
+import '../../core/widgets/app_feedback.dart';
 import '../../core/widgets/base_screen.dart';
 import 'bookings_controller.dart';
 
@@ -67,15 +68,11 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
             return;
           }
 
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Đặt sân thành công')));
+          AppToast.success(context, 'Đặt sân thành công');
           Navigator.of(context).pop();
         },
         error: (error, stackTrace) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(_errorMessage(error))));
+          AppToast.error(context, _bookingErrorMessage(error));
         },
       );
     });
@@ -159,9 +156,7 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
     final startTime = slot?.startTime;
 
     if (startTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng chọn khung giờ hợp lệ')),
-      );
+      AppToast.info(context, 'Vui lòng chọn khung giờ hợp lệ');
       return;
     }
 
@@ -253,7 +248,7 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
     return slots.first;
   }
 
-  String _errorMessage(Object error) {
+  Object _bookingErrorMessage(Object error) {
     if (error is AppException) {
       if (error.message.contains('chưa được cấu hình giá')) {
         return 'Sân này chưa có bảng giá cho khung giờ đã chọn.';

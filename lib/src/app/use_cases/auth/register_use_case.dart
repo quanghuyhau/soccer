@@ -6,7 +6,7 @@ class RegisterUseCase {
 
   final AuthRepository _repository;
 
-  Future<AppUser> call(RegisterRequest request) {
+  Future<AppUser> register(RegisterRequest request) {
     return _repository.register(request);
   }
 }

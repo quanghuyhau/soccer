@@ -10,17 +10,19 @@ class PitchRepositoryImpl extends BaseRepository implements PitchRepository {
 
   @override
   Future<List<Pitch>> getPitches() {
-    return guard(_dataSource.getPitches);
+    return executeDataSourceRequest(_dataSource.getPitches);
   }
 
   @override
   Future<Pitch> getPitch(String pitchId) {
-    return guard(() => _dataSource.getPitch(pitchId));
+    return executeDataSourceRequest(() => _dataSource.getPitch(pitchId));
   }
 
   @override
   Future<List<Pitch>> getPitchesByVenue(String venueId) {
-    return guard(() => _dataSource.getPitchesByVenue(venueId));
+    return executeDataSourceRequest(
+      () => _dataSource.getPitchesByVenue(venueId),
+    );
   }
 
   @override
@@ -28,7 +30,7 @@ class PitchRepositoryImpl extends BaseRepository implements PitchRepository {
     required String venueId,
     required CreatePitchRequest request,
   }) {
-    return guard(
+    return executeDataSourceRequest(
       () => _dataSource.createPitch(venueId: venueId, request: request),
     );
   }
@@ -38,19 +40,19 @@ class PitchRepositoryImpl extends BaseRepository implements PitchRepository {
     required String pitchId,
     required CreatePitchRequest request,
   }) {
-    return guard(
+    return executeDataSourceRequest(
       () => _dataSource.updatePitch(pitchId: pitchId, request: request),
     );
   }
 
   @override
   Future<void> deletePitch(String pitchId) {
-    return guard(() => _dataSource.deletePitch(pitchId));
+    return executeDataSourceRequest(() => _dataSource.deletePitch(pitchId));
   }
 
   @override
   Future<List<PitchPrice>> getPitchPrices(String pitchId) {
-    return guard(() => _dataSource.getPitchPrices(pitchId));
+    return executeDataSourceRequest(() => _dataSource.getPitchPrices(pitchId));
   }
 
   @override
@@ -58,7 +60,7 @@ class PitchRepositoryImpl extends BaseRepository implements PitchRepository {
     required String pitchId,
     required CreatePitchPriceRequest request,
   }) {
-    return guard(
+    return executeDataSourceRequest(
       () => _dataSource.createPitchPrice(pitchId: pitchId, request: request),
     );
   }
@@ -68,13 +70,15 @@ class PitchRepositoryImpl extends BaseRepository implements PitchRepository {
     required String priceId,
     required CreatePitchPriceRequest request,
   }) {
-    return guard(
+    return executeDataSourceRequest(
       () => _dataSource.updatePitchPrice(priceId: priceId, request: request),
     );
   }
 
   @override
   Future<void> deletePitchPrice(String priceId) {
-    return guard(() => _dataSource.deletePitchPrice(priceId));
+    return executeDataSourceRequest(
+      () => _dataSource.deletePitchPrice(priceId),
+    );
   }
 }

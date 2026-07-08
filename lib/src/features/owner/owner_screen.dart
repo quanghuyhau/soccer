@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_design.dart';
+import '../../core/widgets/app_feedback.dart';
 import '../../core/widgets/base_screen.dart';
 import '../bookings/my_bookings_screen.dart';
 import '../venues/venue_detail_screen.dart';
@@ -22,15 +23,11 @@ class OwnerScreen extends ConsumerWidget {
       next.whenOrNull(
         data: (booking) {
           if (booking != null && previous?.isLoading == true) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Cập nhật trạng thái thành công')),
-            );
+            AppToast.success(context, 'Cập nhật trạng thái thành công');
           }
         },
         error: (error, stackTrace) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(error.toString())));
+          AppToast.error(context, error);
         },
       );
     });
@@ -39,15 +36,11 @@ class OwnerScreen extends ConsumerWidget {
       next.whenOrNull(
         data: (value) {
           if (value != null && previous?.isLoading == true) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Đã cập nhật cụm sân')),
-            );
+            AppToast.success(context, 'Đã cập nhật cụm sân');
           }
         },
         error: (error, stackTrace) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(error.toString())));
+          AppToast.error(context, error);
         },
       );
     });

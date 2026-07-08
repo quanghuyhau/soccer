@@ -20,23 +20,17 @@ class BookingDataSource {
 
   Future<List<BookingModel>> getBookings() async {
     final json = await _apiClient.getJson(AppEndpoints.bookings);
-    return readResultList(
-      json,
-    ).map((item) => BookingModel.fromJson(parseJsonObject(item))).toList();
+    return readResultList(json,).map((item) => BookingModel.fromJson(parseJsonObject(item))).toList();
   }
 
   Future<List<BookingModel>> getMyBookings() async {
     final json = await _apiClient.getJson(AppEndpoints.myBookings);
-    return readResultList(
-      json,
-    ).map((item) => BookingModel.fromJson(parseJsonObject(item))).toList();
+    return readResultList(json,).map((item) => BookingModel.fromJson(parseJsonObject(item))).toList();
   }
 
   Future<List<BookingModel>> getBookingsByPitch(String pitchId) async {
     final json = await _apiClient.getJson(AppEndpoints.pitchBookings(pitchId));
-    return readResultList(
-      json,
-    ).map((item) => BookingModel.fromJson(parseJsonObject(item))).toList();
+    return readResultList(json,).map((item) => BookingModel.fromJson(parseJsonObject(item))).toList();
   }
 
   Future<BookingModel> updateBookingStatus({

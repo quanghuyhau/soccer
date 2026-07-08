@@ -11,22 +11,24 @@ class BookingRepositoryImpl extends BaseRepository
 
   @override
   Future<Booking> createBooking(CreateBookingRequest request) {
-    return guard(() => _dataSource.createBooking(request));
+    return executeDataSourceRequest(() => _dataSource.createBooking(request));
   }
 
   @override
   Future<List<Booking>> getBookings() {
-    return guard(_dataSource.getBookings);
+    return executeDataSourceRequest(_dataSource.getBookings);
   }
 
   @override
   Future<List<Booking>> getMyBookings() {
-    return guard(_dataSource.getMyBookings);
+    return executeDataSourceRequest(_dataSource.getMyBookings);
   }
 
   @override
   Future<List<Booking>> getBookingsByPitch(String pitchId) {
-    return guard(() => _dataSource.getBookingsByPitch(pitchId));
+    return executeDataSourceRequest(
+      () => _dataSource.getBookingsByPitch(pitchId),
+    );
   }
 
   @override
@@ -34,7 +36,7 @@ class BookingRepositoryImpl extends BaseRepository
     required String bookingId,
     required UpdateBookingStatusRequest request,
   }) {
-    return guard(
+    return executeDataSourceRequest(
       () => _dataSource.updateBookingStatus(
         bookingId: bookingId,
         request: request,

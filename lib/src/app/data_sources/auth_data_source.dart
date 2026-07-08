@@ -16,7 +16,6 @@ class AuthDataSource {
       data: request.toJson(),
       parser: parseJsonObject,
     );
-
     return AuthTokensModel.fromJson(readResultObject(response.data));
   }
 

@@ -6,7 +6,7 @@ class GetVenuesByOwnerUseCase {
 
   final VenueRepository _repository;
 
-  Future<List<Venue>> call(String ownerId) {
+  Future<List<Venue>> getVenuesByOwner(String ownerId) {
     return _repository.getVenuesByOwner(ownerId);
   }
 }

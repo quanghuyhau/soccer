@@ -6,6 +6,7 @@ import '../../app/session/app_session.dart';
 import '../../core/utils/app_formatters.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_design.dart';
+import '../../core/widgets/app_feedback.dart';
 import '../../core/widgets/base_screen.dart';
 import '../bookings/create_booking_screen.dart';
 import 'venues_controller.dart';
@@ -25,15 +26,11 @@ class VenueDetailScreen extends ConsumerWidget {
       next.whenOrNull(
         data: (pitch) {
           if (pitch != null && previous?.isLoading == true) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('Đã thêm sân con')));
+            AppToast.success(context, 'Đã thêm sân con');
           }
         },
         error: (error, stackTrace) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(error.toString())));
+          AppToast.error(context, error);
         },
       );
     });
@@ -42,15 +39,11 @@ class VenueDetailScreen extends ConsumerWidget {
       next.whenOrNull(
         data: (value) {
           if (value != null && previous?.isLoading == true) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Đã cập nhật bảng giá')),
-            );
+            AppToast.success(context, 'Đã cập nhật bảng giá');
           }
         },
         error: (error, stackTrace) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(error.toString())));
+          AppToast.error(context, error);
         },
       );
     });
@@ -59,15 +52,11 @@ class VenueDetailScreen extends ConsumerWidget {
       next.whenOrNull(
         data: (value) {
           if (value != null && previous?.isLoading == true) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Đã cập nhật sân con')),
-            );
+            AppToast.success(context, 'Đã cập nhật sân con');
           }
         },
         error: (error, stackTrace) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(error.toString())));
+          AppToast.error(context, error);
         },
       );
     });
@@ -660,9 +649,7 @@ class _AddPitchDialogState extends ConsumerState<_AddPitchDialog> {
     final pitch = widget.pitch;
     final price = num.tryParse(_priceController.text.trim());
     if (pitch == null && (price == null || price <= 0)) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Giá phải lớn hơn 0')));
+      AppToast.info(context, 'Giá phải lớn hơn 0');
       return;
     }
 
@@ -800,9 +787,7 @@ class _AddPriceDialogState extends ConsumerState<_AddPriceDialog> {
   void _submit() {
     final price = num.tryParse(_priceController.text.trim());
     if (price == null || price <= 0) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Giá phải lớn hơn 0')));
+      AppToast.info(context, 'Giá phải lớn hơn 0');
       return;
     }
 

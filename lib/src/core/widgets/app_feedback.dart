@@ -7,7 +7,12 @@ class AppToast {
   const AppToast._();
 
   static void success(BuildContext context, String message) {
-    _show(context, message: message, icon: Icons.check_circle, color: AppColors.teal);
+    _show(
+      context,
+      message: message,
+      icon: Icons.check_circle,
+      color: AppColors.teal,
+    );
   }
 
   static void error(BuildContext context, Object error) {
@@ -20,12 +25,24 @@ class AppToast {
   }
 
   static void info(BuildContext context, String message) {
-    _show(context, message: message, icon: Icons.info_outline, color: AppColors.navy);
+    _show(
+      context,
+      message: message,
+      icon: Icons.info_outline,
+      color: AppColors.navy,
+    );
   }
 
-  static String errorMessage(Object error, {String fallback = 'Có lỗi xảy ra'}) {
+  static String errorMessage(
+    Object error, {
+    String fallback = 'Có lỗi xảy ra',
+  }) {
     if (error is AppException) {
       return error.message;
+    }
+
+    if (error is String && error.isNotEmpty) {
+      return error;
     }
 
     return fallback;

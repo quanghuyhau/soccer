@@ -6,7 +6,7 @@ class GetVenuesUseCase {
 
   final VenueRepository _repository;
 
-  Future<List<Venue>> call() {
+  Future<List<Venue>> getVenues() {
     return _repository.getVenues();
   }
 }

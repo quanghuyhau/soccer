@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/error/app_exception.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_design.dart';
+import '../../core/widgets/app_feedback.dart';
 import 'auth_controller.dart';
 import 'auth_layout.dart';
 
@@ -41,16 +41,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       next.whenOrNull(
         data: (_) {
           if (previous?.isLoading == true) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('Đăng ký thành công')));
+            AppToast.success(context, 'Đăng ký thành công');
             Navigator.of(context).pop();
           }
         },
         error: (error, stackTrace) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(_errorMessage(error))));
+          AppToast.error(context, error);
         },
       );
     });
@@ -130,13 +126,5 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           phone: _phoneController.text,
           address: _addressController.text,
         );
-  }
-
-  String _errorMessage(Object error) {
-    if (error is AppException) {
-      return error.message;
-    }
-
-    return 'Đăng ký không thành công';
   }
 }

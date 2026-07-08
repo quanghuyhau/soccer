@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app_design.dart';
+import 'app_feedback.dart';
 import 'app_state_views.dart';
 
 class BaseScreen extends StatelessWidget {
@@ -21,6 +22,8 @@ class BaseScreen extends StatelessWidget {
     this.appBarForegroundColor,
     this.centerTitle = false,
     this.resizeToAvoidBottomInset,
+    this.isLoading = false,
+    this.loadingMessage = 'Đang xử lý...',
   });
 
   final String? title;
@@ -37,6 +40,8 @@ class BaseScreen extends StatelessWidget {
   final Color? appBarForegroundColor;
   final bool centerTitle;
   final bool? resizeToAvoidBottomInset;
+  final bool isLoading;
+  final String loadingMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +50,11 @@ class BaseScreen extends StatelessWidget {
     if (useSafeArea) {
       content = SafeArea(child: content);
     }
+
+    final screenBody = Stack(
+      fit: StackFit.expand,
+      children: [background ?? const BasePitchBackground(), content],
+    );
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -59,9 +69,10 @@ class BaseScreen extends StatelessWidget {
               backgroundColor: appBarBackgroundColor ?? AppColors.pitchBackdrop,
               foregroundColor: appBarForegroundColor ?? Colors.white,
             ),
-      body: Stack(
-        fit: StackFit.expand,
-        children: [background ?? const BasePitchBackground(), content],
+      body: AppLoadingOverlay(
+        isLoading: isLoading,
+        message: loadingMessage,
+        child: screenBody,
       ),
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
@@ -224,6 +235,8 @@ class BaseScrollScreen extends StatelessWidget {
     this.padding = const EdgeInsets.all(16),
     this.bottomNavigationBar,
     this.background,
+    this.isLoading = false,
+    this.loadingMessage = 'Đang xử lý...',
   });
 
   final String? title;
@@ -233,6 +246,8 @@ class BaseScrollScreen extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final Widget? bottomNavigationBar;
   final Widget? background;
+  final bool isLoading;
+  final String loadingMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -248,6 +263,8 @@ class BaseScrollScreen extends StatelessWidget {
       padding: EdgeInsets.zero,
       bottomNavigationBar: bottomNavigationBar,
       background: background,
+      isLoading: isLoading,
+      loadingMessage: loadingMessage,
       body: list,
     );
   }

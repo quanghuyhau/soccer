@@ -13,7 +13,7 @@ class UpdateVenueUseCase {
 
   final VenueRepository _repository;
 
-  Future<Venue> call(UpdateVenueParams params) {
+  Future<Venue> updateVenue(UpdateVenueParams params) {
     return _repository.updateVenue(
       venueId: params.venueId,
       request: params.request,

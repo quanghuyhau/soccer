@@ -18,7 +18,7 @@ class CreatePitchUseCase {
 
   final PitchRepository _repository;
 
-  Future<Pitch> call(CreatePitchParams params) async {
+  Future<Pitch> createPitch(CreatePitchParams params) async {
     final pitch = await _repository.createPitch(
       venueId: params.venueId,
       request: params.request,

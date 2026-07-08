@@ -5,7 +5,7 @@ class DeletePitchUseCase {
 
   final PitchRepository _repository;
 
-  Future<void> call(String pitchId) {
+  Future<void> deletePitch(String pitchId) {
     return _repository.deletePitch(pitchId);
   }
 }

@@ -13,7 +13,7 @@ class UpdatePitchUseCase {
 
   final PitchRepository _repository;
 
-  Future<Pitch> call(UpdatePitchParams params) {
+  Future<Pitch> updatePitch(UpdatePitchParams params) {
     return _repository.updatePitch(
       pitchId: params.pitchId,
       request: params.request,

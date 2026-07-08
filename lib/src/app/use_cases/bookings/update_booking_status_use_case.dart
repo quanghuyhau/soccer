@@ -16,7 +16,7 @@ class UpdateBookingStatusUseCase {
 
   final BookingRepository _repository;
 
-  Future<Booking> call(UpdateBookingStatusParams params) {
+  Future<Booking> updateBookingStatus(UpdateBookingStatusParams params) {
     return _repository.updateBookingStatus(
       bookingId: params.bookingId,
       request: UpdateBookingStatusRequest(status: params.status),
