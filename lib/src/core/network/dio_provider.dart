@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config/app_config.dart';
+import 'app_dio_logger.dart';
 import 'app_interceptor.dart';
 import 'auth_token_provider.dart';
 
@@ -21,7 +22,7 @@ final dioProvider = Provider<Dio>((ref) {
     )
     ..interceptors.addAll([
       AppInterceptor(authToken),
+      AppDioLogger(),
       CurlLoggerDioInterceptor(printOnSuccess: true),
-      LogInterceptor(requestBody: true, responseBody: true),
     ]);
 });

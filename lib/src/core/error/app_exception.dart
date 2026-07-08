@@ -1,8 +1,9 @@
 sealed class AppException implements Exception {
-  const AppException(this.message, {this.statusCode});
+  const AppException(this.message, {this.statusCode, this.backendCode});
 
   final String message;
   final int? statusCode;
+  final int? backendCode;
 
   @override
   String toString() => message;
@@ -13,29 +14,46 @@ class NetworkException extends AppException {
 }
 
 class BadRequestException extends AppException {
-  const BadRequestException(super.message, {super.statusCode});
+  const BadRequestException(
+    super.message, {
+    super.statusCode,
+    super.backendCode,
+  });
 }
 
 class UnauthorizedException extends AppException {
-  const UnauthorizedException(super.message, {super.statusCode});
+  const UnauthorizedException(
+    super.message, {
+    super.statusCode,
+    super.backendCode,
+  });
 }
 
 class ForbiddenException extends AppException {
-  const ForbiddenException(super.message, {super.statusCode});
+  const ForbiddenException(
+    super.message, {
+    super.statusCode,
+    super.backendCode,
+  });
 }
 
 class NotFoundException extends AppException {
-  const NotFoundException(super.message, {super.statusCode});
+  const NotFoundException(super.message, {super.statusCode, super.backendCode});
 }
 
 class ValidationException extends AppException {
-  const ValidationException(super.message, {super.statusCode, this.errors});
+  const ValidationException(
+    super.message, {
+    super.statusCode,
+    super.backendCode,
+    this.errors,
+  });
 
   final Map<String, dynamic>? errors;
 }
 
 class ServerException extends AppException {
-  const ServerException(super.message, {super.statusCode});
+  const ServerException(super.message, {super.statusCode, super.backendCode});
 }
 
 class ParsingException extends AppException {

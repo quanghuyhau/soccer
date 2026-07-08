@@ -154,8 +154,9 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
   void _submit() {
     final slot = _selectedSlot(_availableSlots());
     final startTime = slot?.startTime;
+    final endTime = slot?.endTime;
 
-    if (startTime == null) {
+    if (startTime == null || endTime == null) {
       AppToast.info(context, 'Vui lòng chọn khung giờ hợp lệ');
       return;
     }
@@ -168,6 +169,7 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
             customerName: _nameController.text.trim(),
             customerPhone: _phoneController.text.trim(),
             startTime: startTime,
+            endTime: endTime,
             note: _noteController.text.trim(),
           ),
         );

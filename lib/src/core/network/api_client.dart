@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../error/app_exception.dart';
 import 'api_method.dart';
 import 'api_response.dart';
+import 'backend_error_mapper.dart';
 import 'dio_provider.dart';
 
 final apiClientProvider = Provider<ApiClient>((ref) {
@@ -170,23 +171,12 @@ class ApiClient {
 
     if (response != null) {
       final statusCode = response.statusCode;
-      final message =
-          _extractMessage(response.data) ??
-          response.statusMessage ??
-          'Server error.';
 
-      return switch (statusCode) {
-        400 => BadRequestException(message, statusCode: statusCode),
-        401 => UnauthorizedException(message, statusCode: statusCode),
-        403 => ForbiddenException(message, statusCode: statusCode),
-        404 => NotFoundException(message, statusCode: statusCode),
-        422 => ValidationException(
-          message,
-          statusCode: statusCode,
-          errors: _extractErrors(response.data),
-        ),
-        _ => ServerException(message, statusCode: statusCode),
-      };
+      return BackendErrorMapper.fromResponseBody(
+        response.data,
+        httpStatusCode: statusCode,
+        fallbackMessage: response.statusMessage ?? 'Server error.',
+      );
     }
 
     if (error.type == DioExceptionType.connectionTimeout ||
@@ -196,27 +186,5 @@ class ApiClient {
     }
 
     return NetworkException(error.message ?? 'Network error.');
-  }
-
-  String? _extractMessage(Object? data) {
-    if (data is Map<String, dynamic>) {
-      final message = data['message'] ?? data['error'];
-      if (message is String && message.isNotEmpty) {
-        return message;
-      }
-    }
-
-    return null;
-  }
-
-  Map<String, dynamic>? _extractErrors(Object? data) {
-    if (data is Map<String, dynamic>) {
-      final errors = data['errors'];
-      if (errors is Map<String, dynamic>) {
-        return errors;
-      }
-    }
-
-    return null;
   }
 }

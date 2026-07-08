@@ -497,15 +497,15 @@ class _AddPitchDialogState extends ConsumerState<_AddPitchDialog> {
   void initState() {
     super.initState();
     final pitch = widget.pitch;
-    _codeController = TextEditingController(text: pitch?.code ?? 'PITCH001');
-    _nameController = TextEditingController(text: pitch?.name ?? 'Sân 5A');
+    _codeController = TextEditingController(text: pitch?.code ?? '');
+    _nameController = TextEditingController(text: pitch?.name ?? 'Sân A');
     _descriptionController = TextEditingController(
-      text: pitch?.description ?? 'Sân bóng 5 người',
+      text: pitch?.description ?? 'Sân bóng 7 người',
     );
-    _typeController = TextEditingController(text: pitch?.type ?? 'FIVE');
-    _sizeController = TextEditingController(text: pitch?.size ?? '20x40m');
+    _typeController = TextEditingController(text: pitch?.type ?? 'SEVEN');
+    _sizeController = TextEditingController(text: pitch?.size ?? '30x50m');
     _surfaceController = TextEditingController(
-      text: pitch?.surface ?? 'Cỏ nhân tạo',
+      text: pitch?.surface ?? '',
     );
   }
 

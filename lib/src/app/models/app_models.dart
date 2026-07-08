@@ -477,6 +477,7 @@ class CreateBookingRequest {
     required this.customerName,
     required this.customerPhone,
     required this.startTime,
+    required this.endTime,
     required this.note,
   });
 
@@ -484,6 +485,7 @@ class CreateBookingRequest {
   final String customerName;
   final String customerPhone;
   final DateTime startTime;
+  final DateTime endTime;
   final String note;
 
   Map<String, dynamic> toJson() {
@@ -492,6 +494,7 @@ class CreateBookingRequest {
       'customerName': customerName,
       'customerPhone': customerPhone,
       'startTime': _toApiDateTime(startTime),
+      'endTime': _toApiDateTime(endTime),
       'note': note,
     };
   }
