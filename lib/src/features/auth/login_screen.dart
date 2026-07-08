@@ -87,10 +87,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _login() {
-    ref
-        .read(authControllerProvider.notifier)
-        .login(
-          username: _usernameController.text,
+    ref.read(authControllerProvider.notifier).login(
+      username: _usernameController.text,
           password: _passwordController.text,
         );
   }

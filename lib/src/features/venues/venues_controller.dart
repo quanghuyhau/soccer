@@ -13,11 +13,7 @@ final venueDetailControllerProvider = FutureProvider.autoDispose
       return ref.watch(appUseCaseProvider).venues.getVenueDetail(venueId);
     });
 
-final pitchPriceMutationControllerProvider =
-    StateNotifierProvider.autoDispose<
-      PitchPriceMutationController,
-      AsyncValue<Object?>
-    >((ref) {
+final pitchPriceMutationControllerProvider = StateNotifierProvider.autoDispose<PitchPriceMutationController, AsyncValue<Object?>>((ref) {
       return PitchPriceMutationController(ref);
     });
 
