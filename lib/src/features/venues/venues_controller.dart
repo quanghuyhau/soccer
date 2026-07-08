@@ -5,12 +5,12 @@ import '../../app/models/app_models.dart';
 import '../../app/use_cases/app_use_case.dart';
 
 final venuesControllerProvider = FutureProvider.autoDispose<List<Venue>>((ref) {
-  return ref.watch(appUseCaseProvider).getVenues();
+  return ref.watch(appUseCaseProvider).venues.getVenues();
 });
 
 final venueDetailControllerProvider = FutureProvider.autoDispose
     .family<VenueDetailData, String>((ref, venueId) {
-      return ref.watch(appUseCaseProvider).getVenueDetail(venueId);
+      return ref.watch(appUseCaseProvider).venues.getVenueDetail(venueId);
     });
 
 final pitchPriceMutationControllerProvider =
@@ -51,6 +51,7 @@ class CreatePitchController extends StateNotifier<AsyncValue<Pitch?>> {
     state = await AsyncValue.guard(() {
       return _ref
           .read(appUseCaseProvider)
+          .venues
           .createPitch(
             CreatePitchParams(
               venueId: venueId,
@@ -78,6 +79,7 @@ class PitchMutationController extends StateNotifier<AsyncValue<Object?>> {
     state = await AsyncValue.guard(() {
       return _ref
           .read(appUseCaseProvider)
+          .venues
           .updatePitch(UpdatePitchParams(pitchId: pitchId, request: request));
     });
 
@@ -90,7 +92,7 @@ class PitchMutationController extends StateNotifier<AsyncValue<Object?>> {
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await _ref.read(appUseCaseProvider).deletePitch(pitchId);
+      await _ref.read(appUseCaseProvider).venues.deletePitch(pitchId);
       return true;
     });
 
@@ -112,6 +114,7 @@ class PitchPriceMutationController extends StateNotifier<AsyncValue<Object?>> {
     state = await AsyncValue.guard(() {
       return _ref
           .read(appUseCaseProvider)
+          .venues
           .createPitchPrice(
             CreatePitchPriceParams(pitchId: pitchId, request: request),
           );
@@ -129,6 +132,7 @@ class PitchPriceMutationController extends StateNotifier<AsyncValue<Object?>> {
     state = await AsyncValue.guard(() {
       return _ref
           .read(appUseCaseProvider)
+          .venues
           .updatePitchPrice(
             UpdatePitchPriceParams(priceId: priceId, request: request),
           );
@@ -143,7 +147,7 @@ class PitchPriceMutationController extends StateNotifier<AsyncValue<Object?>> {
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await _ref.read(appUseCaseProvider).deletePitchPrice(priceId);
+      await _ref.read(appUseCaseProvider).venues.deletePitchPrice(priceId);
       return true;
     });
 

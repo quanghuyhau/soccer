@@ -7,7 +7,7 @@ import '../../app/use_cases/app_use_case.dart';
 final myBookingsControllerProvider = FutureProvider.autoDispose<List<Booking>>((
   ref,
 ) {
-  return ref.watch(appUseCaseProvider).getMyBookings();
+  return ref.watch(appUseCaseProvider).bookings.getMyBookings();
 });
 
 final createBookingControllerProvider =
@@ -26,7 +26,7 @@ class CreateBookingController extends StateNotifier<AsyncValue<Booking?>> {
   Future<void> create(CreateBookingRequest request) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() {
-      return _ref.read(appUseCaseProvider).createBooking(request);
+      return _ref.read(appUseCaseProvider).bookings.createBooking(request);
     });
 
     _ref.invalidate(myBookingsControllerProvider);

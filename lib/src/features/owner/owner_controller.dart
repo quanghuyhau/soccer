@@ -16,8 +16,8 @@ final ownerDashboardControllerProvider =
 
       final useCase = ref.watch(appUseCaseProvider);
       final results = await Future.wait<Object>([
-        useCase.getVenuesByOwner(user.id),
-        useCase.getAllBookings(),
+        useCase.venues.getVenuesByOwner(user.id),
+        useCase.bookings.getAllBookings(),
       ]);
 
       return OwnerDashboardData(
@@ -57,7 +57,7 @@ class VenueMutationController extends StateNotifier<AsyncValue<Object?>> {
   Future<void> create(CreateVenueRequest request) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() {
-      return _ref.read(appUseCaseProvider).createVenue(request);
+      return _ref.read(appUseCaseProvider).venues.createVenue(request);
     });
 
     _ref.invalidate(ownerDashboardControllerProvider);
@@ -71,6 +71,7 @@ class VenueMutationController extends StateNotifier<AsyncValue<Object?>> {
     state = await AsyncValue.guard(() {
       return _ref
           .read(appUseCaseProvider)
+          .venues
           .updateVenue(UpdateVenueParams(venueId: venueId, request: request));
     });
 
@@ -80,7 +81,7 @@ class VenueMutationController extends StateNotifier<AsyncValue<Object?>> {
   Future<void> delete(String venueId) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await _ref.read(appUseCaseProvider).deleteVenue(venueId);
+      await _ref.read(appUseCaseProvider).venues.deleteVenue(venueId);
       return true;
     });
 
@@ -101,6 +102,7 @@ class BookingStatusController extends StateNotifier<AsyncValue<Booking?>> {
     state = await AsyncValue.guard(() {
       return _ref
           .read(appUseCaseProvider)
+          .bookings
           .updateBookingStatus(
             UpdateBookingStatusParams(bookingId: bookingId, status: status),
           );

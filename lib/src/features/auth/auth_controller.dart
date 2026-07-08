@@ -24,6 +24,7 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
     state = await AsyncValue.guard(() async {
       final session = await _ref
           .read(appUseCaseProvider)
+          .auth
           .login(LoginRequest(username: username.trim(), password: password));
 
       _ref.read(appSessionProvider.notifier).setSession(session);
@@ -43,6 +44,7 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
     state = await AsyncValue.guard(() async {
       await _ref
           .read(appUseCaseProvider)
+          .auth
           .register(
             RegisterRequest(
               username: username.trim(),
