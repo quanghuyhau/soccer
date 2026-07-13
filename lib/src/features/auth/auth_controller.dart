@@ -23,10 +23,7 @@ class AuthController extends StateNotifier<AppState<void>> {
     state = const AppState.loading();
 
     state = await AppState.guard(() async {
-      final session = await _ref
-          .read(appUseCaseProvider)
-          .auth
-          .login(LoginRequest(username: username.trim(), password: password));
+      final session = await _ref.read(appUseCaseProvider).auth.login(LoginRequest(username: username.trim(), password: password));
       _ref.read(appSessionProvider.notifier).setSession(session);
     });
   }

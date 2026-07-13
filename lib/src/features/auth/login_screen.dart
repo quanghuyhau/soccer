@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../app/errors/auth_error_type.dart';
 import '../../core/state/app_state_listener.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_design.dart';
-import '../../core/widgets/base_popup.dart';
 import 'auth_controller.dart';
 import 'auth_layout.dart';
 import 'register_screen.dart';
@@ -31,33 +29,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
-    AppStateListener.listen<void>(
-      ref,
-      authControllerProvider,
-      context,
-      failureRules: [
-        AppFailureRule(
-          reasons: const {AuthErrorType.unauthorized},
-          action: (context, failure) {
-            BasePopup.showFailure(
-              failure,
-              context: context,
-              title: 'Không có quyền truy cập',
-            );
-          },
-        ),
-        AppFailureRule(
-          reasons: const {AuthErrorType.invalidUsernameOrPassword},
-          action: (context, failure) {
-            BasePopup.showFailure(
-              failure,
-              context: context,
-              title: 'Đăng nhập không thành công',
-            );
-          },
-        ),
-      ],
-    );
+    AppStateListener.listen<void>(ref, authControllerProvider, context);
 
     return AuthScaffold(
       title: 'Đăng nhập',

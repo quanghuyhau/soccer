@@ -54,7 +54,6 @@ class AppFailure<T> extends AppState<T> {
     this.backendCode,
     this.statusCode,
     this.errors,
-    this.reason,
     this.error,
     this.stackTrace,
   });
@@ -66,7 +65,6 @@ class AppFailure<T> extends AppState<T> {
         backendCode: error.backendCode,
         statusCode: error.statusCode,
         errors: error is ValidationException ? error.errors : null,
-        reason: error.reason,
         error: error,
         stackTrace: stackTrace,
       );
@@ -83,11 +81,8 @@ class AppFailure<T> extends AppState<T> {
   final int? backendCode;
   final int? statusCode;
   final Map<String, dynamic>? errors;
-  final Object? reason;
   final Object? error;
   final StackTrace? stackTrace;
 
   bool hasBackendCode(int code) => backendCode == code;
-
-  bool hasReason(Object value) => reason == value;
 }

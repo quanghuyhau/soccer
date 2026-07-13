@@ -9,32 +9,37 @@ class VenueDataSource {
   final ApiClient _apiClient;
 
   Future<List<VenueModel>> getVenues() async {
-    final json = await _apiClient.getJson(AppEndpoints.venues);
-    return readResultList(
-      json,
-    ).map((item) => VenueModel.fromJson(parseJsonObject(item))).toList();
+    final response = await _apiClient.get<List<Map<String, dynamic>>>(
+      AppEndpoints.venues,
+      parser: parseApiObjectList,
+    );
+    return response.data.map(VenueModel.fromJson).toList();
   }
 
   Future<VenueModel> getVenue(String venueId) async {
-    final json = await _apiClient.getJson(AppEndpoints.venue(venueId));
-    return VenueModel.fromJson(readResultObject(json));
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      AppEndpoints.venue(venueId),
+      parser: parseApiObject,
+    );
+    return VenueModel.fromJson(response.data);
   }
 
   Future<List<VenueModel>> getVenuesByOwner(String ownerId) async {
-    final json = await _apiClient.getJson(AppEndpoints.venuesByOwner(ownerId));
-    return readResultList(
-      json,
-    ).map((item) => VenueModel.fromJson(parseJsonObject(item))).toList();
+    final response = await _apiClient.get<List<Map<String, dynamic>>>(
+      AppEndpoints.venuesByOwner(ownerId),
+      parser: parseApiObjectList,
+    );
+    return response.data.map(VenueModel.fromJson).toList();
   }
 
   Future<VenueModel> createVenue(CreateVenueRequest request) async {
     final response = await _apiClient.post<Map<String, dynamic>>(
       AppEndpoints.venues,
       data: request.toJson(),
-      parser: parseJsonObject,
+      parser: parseApiObject,
     );
 
-    return VenueModel.fromJson(readResultObject(response.data));
+    return VenueModel.fromJson(response.data);
   }
 
   Future<VenueModel> updateVenue({
@@ -44,18 +49,16 @@ class VenueDataSource {
     final response = await _apiClient.put<Map<String, dynamic>>(
       AppEndpoints.venue(venueId),
       data: request.toJson(),
-      parser: parseJsonObject,
+      parser: parseApiObject,
     );
 
-    return VenueModel.fromJson(readResultObject(response.data));
+    return VenueModel.fromJson(response.data);
   }
 
   Future<void> deleteVenue(String venueId) async {
-    final response = await _apiClient.delete<Map<String, dynamic>>(
+    await _apiClient.delete<Object?>(
       AppEndpoints.venue(venueId),
-      parser: parseJsonObject,
+      parser: parseApiSuccess,
     );
-
-    ensureSuccessfulEnvelope(response.data);
   }
 }

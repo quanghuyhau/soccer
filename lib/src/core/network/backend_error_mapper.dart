@@ -1,5 +1,4 @@
 import '../error/app_exception.dart';
-import '../../app/errors/auth_error_type.dart';
 
 class BackendErrorCode {
   const BackendErrorCode._();
@@ -24,14 +23,12 @@ class BackendErrorMapper {
     final message =
         _extractMessage(data) ?? fallbackMessage ?? 'Có lỗi xảy ra.';
     final errors = _extractErrors(data);
-    final reason = AuthErrorClassifier.from(code: code, message: message);
 
     return fromCode(
       code,
       message: message,
       httpStatusCode: httpStatusCode,
       errors: errors,
-      reason: reason,
     );
   }
 
@@ -40,53 +37,40 @@ class BackendErrorMapper {
     required String message,
     int? httpStatusCode,
     Map<String, dynamic>? errors,
-    Object? reason,
   }) {
-    final resolvedReason = reason ?? reasonOf(code: code, message: message);
-
     return switch (code ?? httpStatusCode) {
       BackendErrorCode.badRequest => BadRequestException(
         message,
         statusCode: httpStatusCode,
         backendCode: code,
-        reason: resolvedReason,
       ),
       BackendErrorCode.unauthorized => UnauthorizedException(
         message,
         statusCode: httpStatusCode,
         backendCode: code,
-        reason: resolvedReason,
       ),
       BackendErrorCode.forbidden => ForbiddenException(
         message,
         statusCode: httpStatusCode,
         backendCode: code,
-        reason: resolvedReason,
       ),
       BackendErrorCode.notFound => NotFoundException(
         message,
         statusCode: httpStatusCode,
         backendCode: code,
-        reason: resolvedReason,
       ),
       BackendErrorCode.validation => ValidationException(
         message,
         statusCode: httpStatusCode,
         backendCode: code,
-        reason: resolvedReason,
         errors: errors,
       ),
       _ => ServerException(
         message,
         statusCode: httpStatusCode,
         backendCode: code,
-        reason: resolvedReason,
       ),
     };
-  }
-
-  static Object? reasonOf({required int? code, required String message}) {
-    return AuthErrorClassifier.from(code: code, message: message);
   }
 
   static int? _extractCode(Object? data) {

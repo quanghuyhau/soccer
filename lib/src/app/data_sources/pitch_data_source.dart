@@ -9,22 +9,27 @@ class PitchDataSource {
   final ApiClient _apiClient;
 
   Future<List<PitchModel>> getPitches() async {
-    final json = await _apiClient.getJson(AppEndpoints.pitches);
-    return readResultList(
-      json,
-    ).map((item) => PitchModel.fromJson(parseJsonObject(item))).toList();
+    final response = await _apiClient.get<List<Map<String, dynamic>>>(
+      AppEndpoints.pitches,
+      parser: parseApiObjectList,
+    );
+    return response.data.map(PitchModel.fromJson).toList();
   }
 
   Future<PitchModel> getPitch(String pitchId) async {
-    final json = await _apiClient.getJson(AppEndpoints.pitch(pitchId));
-    return PitchModel.fromJson(readResultObject(json));
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      AppEndpoints.pitch(pitchId),
+      parser: parseApiObject,
+    );
+    return PitchModel.fromJson(response.data);
   }
 
   Future<List<PitchModel>> getPitchesByVenue(String venueId) async {
-    final json = await _apiClient.getJson(AppEndpoints.pitchesByVenue(venueId));
-    return readResultList(
-      json,
-    ).map((item) => PitchModel.fromJson(parseJsonObject(item))).toList();
+    final response = await _apiClient.get<List<Map<String, dynamic>>>(
+      AppEndpoints.pitchesByVenue(venueId),
+      parser: parseApiObjectList,
+    );
+    return response.data.map(PitchModel.fromJson).toList();
   }
 
   Future<PitchModel> createPitch({
@@ -34,10 +39,10 @@ class PitchDataSource {
     final response = await _apiClient.post<Map<String, dynamic>>(
       AppEndpoints.pitchesByVenue(venueId),
       data: request.toJson(),
-      parser: parseJsonObject,
+      parser: parseApiObject,
     );
 
-    return PitchModel.fromJson(readResultObject(response.data));
+    return PitchModel.fromJson(response.data);
   }
 
   Future<PitchModel> updatePitch({
@@ -47,26 +52,25 @@ class PitchDataSource {
     final response = await _apiClient.put<Map<String, dynamic>>(
       AppEndpoints.pitch(pitchId),
       data: request.toJson(),
-      parser: parseJsonObject,
+      parser: parseApiObject,
     );
 
-    return PitchModel.fromJson(readResultObject(response.data));
+    return PitchModel.fromJson(response.data);
   }
 
   Future<void> deletePitch(String pitchId) async {
-    final response = await _apiClient.delete<Map<String, dynamic>>(
+    await _apiClient.delete<Object?>(
       AppEndpoints.pitch(pitchId),
-      parser: parseJsonObject,
+      parser: parseApiSuccess,
     );
-
-    ensureSuccessfulEnvelope(response.data);
   }
 
   Future<List<PitchPriceModel>> getPitchPrices(String pitchId) async {
-    final json = await _apiClient.getJson(AppEndpoints.pitchPrices(pitchId));
-    return readResultList(
-      json,
-    ).map((item) => PitchPriceModel.fromJson(parseJsonObject(item))).toList();
+    final response = await _apiClient.get<List<Map<String, dynamic>>>(
+      AppEndpoints.pitchPrices(pitchId),
+      parser: parseApiObjectList,
+    );
+    return response.data.map(PitchPriceModel.fromJson).toList();
   }
 
   Future<PitchPriceModel> createPitchPrice({
@@ -76,10 +80,10 @@ class PitchDataSource {
     final response = await _apiClient.post<Map<String, dynamic>>(
       AppEndpoints.pitchPrices(pitchId),
       data: request.toJson(),
-      parser: parseJsonObject,
+      parser: parseApiObject,
     );
 
-    return PitchPriceModel.fromJson(readResultObject(response.data));
+    return PitchPriceModel.fromJson(response.data);
   }
 
   Future<PitchPriceModel> updatePitchPrice({
@@ -89,18 +93,16 @@ class PitchDataSource {
     final response = await _apiClient.put<Map<String, dynamic>>(
       AppEndpoints.pitchPrice(priceId),
       data: request.toJson(),
-      parser: parseJsonObject,
+      parser: parseApiObject,
     );
 
-    return PitchPriceModel.fromJson(readResultObject(response.data));
+    return PitchPriceModel.fromJson(response.data);
   }
 
   Future<void> deletePitchPrice(String priceId) async {
-    final response = await _apiClient.delete<Map<String, dynamic>>(
+    await _apiClient.delete<Object?>(
       AppEndpoints.pitchPrice(priceId),
-      parser: parseJsonObject,
+      parser: parseApiSuccess,
     );
-
-    ensureSuccessfulEnvelope(response.data);
   }
 }

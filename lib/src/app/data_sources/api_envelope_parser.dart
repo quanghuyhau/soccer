@@ -9,33 +9,33 @@ Map<String, dynamic> parseJsonObject(Object? data) {
   throw const ParsingException('Response data is not a JSON object.');
 }
 
-Map<String, dynamic> readResultObject(Map<String, dynamic> envelope) {
-  _throwIfApiCodeFailed(envelope);
+Map<String, dynamic> parseApiObject(Object? data) {
+  final envelope = parseJsonObject(data);
+  _checkApiCode(envelope);
 
   final result = envelope['result'];
-  if (result is Map<String, dynamic>) {
-    return result;
-  }
-
-  throw const ParsingException('API result is not a JSON object.');
+  return parseJsonObject(result);
 }
 
-List<dynamic> readResultList(Map<String, dynamic> envelope) {
-  _throwIfApiCodeFailed(envelope);
+List<Map<String, dynamic>> parseApiObjectList(Object? data) {
+  final envelope = parseJsonObject(data);
+  _checkApiCode(envelope);
 
   final result = envelope['result'];
-  if (result is List<dynamic>) {
-    return result;
+  if (result is! List<dynamic>) {
+    throw const ParsingException('API result is not a JSON array.');
   }
 
-  throw const ParsingException('API result is not a JSON array.');
+  return result.map(parseJsonObject).toList();
 }
 
-void ensureSuccessfulEnvelope(Map<String, dynamic> envelope) {
-  _throwIfApiCodeFailed(envelope);
+Object? parseApiSuccess(Object? data) {
+  final envelope = parseJsonObject(data);
+  _checkApiCode(envelope);
+  return null;
 }
 
-void _throwIfApiCodeFailed(Map<String, dynamic> envelope) {
+void _checkApiCode(Map<String, dynamic> envelope) {
   final code = envelope['code'];
   final message = envelope['message'];
 
@@ -44,10 +44,6 @@ void _throwIfApiCodeFailed(Map<String, dynamic> envelope) {
       code,
       message: message is String ? message : 'Request failed.',
       httpStatusCode: null,
-      reason: BackendErrorMapper.reasonOf(
-        code: code,
-        message: message is String ? message : 'Request failed.',
-      ),
     );
   }
 }
