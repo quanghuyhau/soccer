@@ -6,7 +6,7 @@ Map<String, dynamic> parseJsonObject(Object? data) {
     return data;
   }
 
-  throw const ParsingException('Response data is not a JSON object.');
+  throw const AppException.parsing('Response data is not a JSON object.');
 }
 
 Map<String, dynamic> parseApiObject(Object? data) {
@@ -23,7 +23,7 @@ List<Map<String, dynamic>> parseApiObjectList(Object? data) {
 
   final result = envelope['result'];
   if (result is! List<dynamic>) {
-    throw const ParsingException('API result is not a JSON array.');
+    throw const AppException.parsing('API result is not a JSON array.');
   }
 
   return result.map(parseJsonObject).toList();

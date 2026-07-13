@@ -76,7 +76,9 @@ class AuthTokensModel extends AuthTokens {
     final refreshToken = json['refreshToken'];
 
     if (accessToken is! String || refreshToken is! String) {
-      throw const ParsingException('Login response has invalid token data.');
+      throw const AppException.parsing(
+        'Login response has invalid token data.',
+      );
     }
 
     return AuthTokensModel(

@@ -1,69 +1,48 @@
-sealed class AppException implements Exception {
-  const AppException(this.message, {this.statusCode, this.backendCode});
+enum AppExceptionType { backend, network, parsing, cancelled, unknown }
 
-  final String message;
-  final int? statusCode;
-  final int? backendCode;
-
-  @override
-  String toString() => message;
-}
-
-class NetworkException extends AppException {
-  const NetworkException(super.message);
-}
-
-class BadRequestException extends AppException {
-  const BadRequestException(
-    super.message, {
-    super.statusCode,
-    super.backendCode,
-  });
-}
-
-class UnauthorizedException extends AppException {
-  const UnauthorizedException(
-    super.message, {
-    super.statusCode,
-    super.backendCode,
-  });
-}
-
-class ForbiddenException extends AppException {
-  const ForbiddenException(
-    super.message, {
-    super.statusCode,
-    super.backendCode,
-  });
-}
-
-class NotFoundException extends AppException {
-  const NotFoundException(super.message, {super.statusCode, super.backendCode});
-}
-
-class ValidationException extends AppException {
-  const ValidationException(
-    super.message, {
-    super.statusCode,
-    super.backendCode,
+class AppException implements Exception {
+  const AppException(
+    this.message, {
+    this.type = AppExceptionType.unknown,
+    this.statusCode,
+    this.backendCode,
     this.errors,
   });
 
+  const AppException.backend(
+    this.message, {
+    this.statusCode,
+    this.backendCode,
+    this.errors,
+  }) : type = AppExceptionType.backend;
+
+  const AppException.network(this.message)
+    : type = AppExceptionType.network,
+      statusCode = null,
+      backendCode = null,
+      errors = null;
+
+  const AppException.parsing(this.message)
+    : type = AppExceptionType.parsing,
+      statusCode = null,
+      backendCode = null,
+      errors = null;
+
+  const AppException.cancelled(this.message)
+    : type = AppExceptionType.cancelled,
+      statusCode = null,
+      backendCode = null,
+      errors = null;
+
+  final String message;
+  final AppExceptionType type;
+  final int? statusCode;
+  final int? backendCode;
   final Map<String, dynamic>? errors;
-}
 
-class ServerException extends AppException {
-  const ServerException(super.message, {super.statusCode, super.backendCode});
-}
+  bool get isBackendError => type == AppExceptionType.backend;
+  bool get isNetworkError => type == AppExceptionType.network;
 
-class ParsingException extends AppException {
-  const ParsingException(super.message);
-}
-
-class CancelledException extends AppException {
-  const CancelledException(super.message);
-}
-
-class UnknownException extends AppException {
-  const UnknownException(super.message);
+  @override
+  String toString() => message;
 }

@@ -64,7 +64,7 @@ class AppFailure<T> extends AppState<T> {
         message: error.message,
         backendCode: error.backendCode,
         statusCode: error.statusCode,
-        errors: error is ValidationException ? error.errors : null,
+        errors: error.errors,
         error: error,
         stackTrace: stackTrace,
       );

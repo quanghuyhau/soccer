@@ -38,39 +38,12 @@ class BackendErrorMapper {
     int? httpStatusCode,
     Map<String, dynamic>? errors,
   }) {
-    return switch (code ?? httpStatusCode) {
-      BackendErrorCode.badRequest => BadRequestException(
-        message,
-        statusCode: httpStatusCode,
-        backendCode: code,
-      ),
-      BackendErrorCode.unauthorized => UnauthorizedException(
-        message,
-        statusCode: httpStatusCode,
-        backendCode: code,
-      ),
-      BackendErrorCode.forbidden => ForbiddenException(
-        message,
-        statusCode: httpStatusCode,
-        backendCode: code,
-      ),
-      BackendErrorCode.notFound => NotFoundException(
-        message,
-        statusCode: httpStatusCode,
-        backendCode: code,
-      ),
-      BackendErrorCode.validation => ValidationException(
-        message,
-        statusCode: httpStatusCode,
-        backendCode: code,
-        errors: errors,
-      ),
-      _ => ServerException(
-        message,
-        statusCode: httpStatusCode,
-        backendCode: code,
-      ),
-    };
+    return AppException.backend(
+      message,
+      statusCode: httpStatusCode,
+      backendCode: code,
+      errors: errors,
+    );
   }
 
   static int? _extractCode(Object? data) {

@@ -48,7 +48,7 @@ class ApiClient {
     } on AppException {
       rethrow;
     } catch (error) {
-      throw ParsingException(error.toString());
+      throw AppException.parsing(error.toString());
     }
   }
 
@@ -151,7 +151,7 @@ class ApiClient {
       return data;
     }
 
-    throw const ParsingException('Response data is not a JSON object.');
+    throw const AppException.parsing('Response data is not a JSON object.');
   }
 
   List<dynamic> _parseJsonList(Object? data) {
@@ -159,12 +159,12 @@ class ApiClient {
       return data;
     }
 
-    throw const ParsingException('Response data is not a JSON array.');
+    throw const AppException.parsing('Response data is not a JSON array.');
   }
 
   AppException _mapDioException(DioException error) {
     if (error.type == DioExceptionType.cancel) {
-      return const CancelledException('Request was cancelled.');
+      return const AppException.cancelled('Request was cancelled.');
     }
 
     final response = error.response;
@@ -182,9 +182,9 @@ class ApiClient {
     if (error.type == DioExceptionType.connectionTimeout ||
         error.type == DioExceptionType.receiveTimeout ||
         error.type == DioExceptionType.sendTimeout) {
-      return const NetworkException('Connection timeout.');
+      return const AppException.network('Connection timeout.');
     }
 
-    return NetworkException(error.message ?? 'Network error.');
+    return AppException.network(error.message ?? 'Network error.');
   }
 }

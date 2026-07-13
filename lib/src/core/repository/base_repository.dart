@@ -9,7 +9,7 @@ abstract class BaseRepository {
     } on AppException {
       rethrow;
     } catch (error) {
-      throw UnknownException(error.toString());
+      throw AppException(error.toString());
     }
   }
 }
