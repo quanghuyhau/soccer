@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/state/app_state_listener.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_design.dart';
 import '../../core/widgets/app_feedback.dart';
@@ -37,19 +38,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
 
-    ref.listen(authControllerProvider, (previous, next) {
-      next.whenOrNull(
-        data: (_) {
-          if (previous?.isLoading == true) {
-            AppToast.success(context, 'Đăng ký thành công');
-            Navigator.of(context).pop();
-          }
-        },
-        error: (error, stackTrace) {
-          AppToast.error(context, error);
-        },
-      );
-    });
+    AppStateListener.listen<void>(
+      ref,
+      authControllerProvider,
+      context,
+      onSuccess: (_) {
+        AppToast.success(context, 'Đăng ký thành công');
+        Navigator.of(context).pop();
+      },
+      showDefaultFailurePopup: true,
+    );
 
     return AuthScaffold(
       title: 'Tạo tài khoản',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../error/app_exception.dart';
+import '../state/app_state.dart';
 import 'app_design.dart';
 
 class AppToast {
@@ -19,6 +20,15 @@ class AppToast {
     _show(
       context,
       message: errorMessage(error),
+      icon: Icons.error_outline,
+      color: AppColors.coral,
+    );
+  }
+
+  static void failure(BuildContext context, AppFailure<dynamic> failure) {
+    _show(
+      context,
+      message: failure.message,
       icon: Icons.error_outline,
       color: AppColors.coral,
     );

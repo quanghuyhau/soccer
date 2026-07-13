@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/state/app_state_listener.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_design.dart';
-import '../../core/widgets/app_feedback.dart';
+import '../../core/widgets/base_popup.dart';
 import 'auth_controller.dart';
 import 'auth_layout.dart';
 import 'register_screen.dart';
@@ -29,13 +30,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
-    ref.listen(authControllerProvider, (previous, next) {
-      next.whenOrNull(
-        error: (error, stackTrace) {
-          AppToast.error(context, error);
-        },
-      );
-    });
+    AppStateListener.listen<void>(
+      ref,
+      authControllerProvider,
+      context,
+      failureRules: [
+        AppFailureRule(
+          codes: const {403},
+          action: (context, failure) {
+            BasePopup.showFailure(
+              failure,
+              context: context,
+              title: 'Tài khoản bị chặn',
+            );
+          },
+        ),
+      ],
+    );
 
     return AuthScaffold(
       title: 'Đăng nhập',
@@ -87,8 +98,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _login() {
-    ref.read(authControllerProvider.notifier).login(
-      username: _usernameController.text,
+    ref
+        .read(authControllerProvider.notifier)
+        .login(
+          username: _usernameController.text,
           password: _passwordController.text,
         );
   }

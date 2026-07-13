@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/navigation/app_navigator.dart';
 import '../core/widgets/app_design.dart';
 import '../features/auth/auth_gate.dart';
 
@@ -9,6 +10,7 @@ class SoccerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: appNavigatorKey,
       title: 'Soccer',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
