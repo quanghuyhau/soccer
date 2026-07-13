@@ -1,9 +1,15 @@
 sealed class AppException implements Exception {
-  const AppException(this.message, {this.statusCode, this.backendCode});
+  const AppException(
+    this.message, {
+    this.statusCode,
+    this.backendCode,
+    this.reason,
+  });
 
   final String message;
   final int? statusCode;
   final int? backendCode;
+  final Object? reason;
 
   @override
   String toString() => message;
@@ -18,6 +24,7 @@ class BadRequestException extends AppException {
     super.message, {
     super.statusCode,
     super.backendCode,
+    super.reason,
   });
 }
 
@@ -26,6 +33,7 @@ class UnauthorizedException extends AppException {
     super.message, {
     super.statusCode,
     super.backendCode,
+    super.reason,
   });
 }
 
@@ -34,11 +42,17 @@ class ForbiddenException extends AppException {
     super.message, {
     super.statusCode,
     super.backendCode,
+    super.reason,
   });
 }
 
 class NotFoundException extends AppException {
-  const NotFoundException(super.message, {super.statusCode, super.backendCode});
+  const NotFoundException(
+    super.message, {
+    super.statusCode,
+    super.backendCode,
+    super.reason,
+  });
 }
 
 class ValidationException extends AppException {
@@ -46,6 +60,7 @@ class ValidationException extends AppException {
     super.message, {
     super.statusCode,
     super.backendCode,
+    super.reason,
     this.errors,
   });
 
@@ -53,7 +68,12 @@ class ValidationException extends AppException {
 }
 
 class ServerException extends AppException {
-  const ServerException(super.message, {super.statusCode, super.backendCode});
+  const ServerException(
+    super.message, {
+    super.statusCode,
+    super.backendCode,
+    super.reason,
+  });
 }
 
 class ParsingException extends AppException {

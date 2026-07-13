@@ -44,6 +44,10 @@ void _throwIfApiCodeFailed(Map<String, dynamic> envelope) {
       code,
       message: message is String ? message : 'Request failed.',
       httpStatusCode: null,
+      reason: BackendErrorMapper.reasonOf(
+        code: code,
+        message: message is String ? message : 'Request failed.',
+      ),
     );
   }
 }

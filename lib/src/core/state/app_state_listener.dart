@@ -9,14 +9,21 @@ typedef AppFailureAction =
     void Function(BuildContext context, AppFailure<dynamic> failure);
 
 class AppFailureRule {
-  const AppFailureRule({required this.codes, required this.action});
+  const AppFailureRule({
+    this.codes = const {},
+    this.reasons = const {},
+    required this.action,
+  });
 
   final Set<int> codes;
+  final Set<Object> reasons;
   final AppFailureAction action;
 
   bool matches(AppFailure<dynamic> failure) {
     final code = failure.backendCode ?? failure.statusCode;
-    return code != null && codes.contains(code);
+    final reason = failure.reason;
+    return (code != null && codes.contains(code)) ||
+        (reason != null && reasons.contains(reason));
   }
 }
 

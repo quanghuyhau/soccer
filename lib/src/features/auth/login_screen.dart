@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/errors/auth_error_type.dart';
 import '../../core/state/app_state_listener.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_design.dart';
@@ -36,12 +37,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       context,
       failureRules: [
         AppFailureRule(
-          codes: const {403},
+          reasons: const {AuthErrorType.unauthorized},
           action: (context, failure) {
             BasePopup.showFailure(
               failure,
               context: context,
-              title: 'Tài khoản bị chặn',
+              title: 'Không có quyền truy cập',
+            );
+          },
+        ),
+        AppFailureRule(
+          reasons: const {AuthErrorType.invalidUsernameOrPassword},
+          action: (context, failure) {
+            BasePopup.showFailure(
+              failure,
+              context: context,
+              title: 'Đăng nhập không thành công',
             );
           },
         ),
