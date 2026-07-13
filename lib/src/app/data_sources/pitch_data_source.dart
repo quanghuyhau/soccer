@@ -8,31 +8,31 @@ class PitchDataSource {
 
   final ApiClient _apiClient;
 
-  Future<List<PitchModel>> getPitches() async {
+  Future<List<PitchResponse>> getPitches() async {
     final response = await _apiClient.get<List<Map<String, dynamic>>>(
       AppEndpoints.pitches,
       parser: parseApiObjectList,
     );
-    return response.data.map(PitchModel.fromJson).toList();
+    return response.data.map(PitchResponse.fromJson).toList();
   }
 
-  Future<PitchModel> getPitch(String pitchId) async {
+  Future<PitchResponse> getPitch(String pitchId) async {
     final response = await _apiClient.get<Map<String, dynamic>>(
       AppEndpoints.pitch(pitchId),
       parser: parseApiObject,
     );
-    return PitchModel.fromJson(response.data);
+    return PitchResponse.fromJson(response.data);
   }
 
-  Future<List<PitchModel>> getPitchesByVenue(String venueId) async {
+  Future<List<PitchResponse>> getPitchesByVenue(String venueId) async {
     final response = await _apiClient.get<List<Map<String, dynamic>>>(
       AppEndpoints.pitchesByVenue(venueId),
       parser: parseApiObjectList,
     );
-    return response.data.map(PitchModel.fromJson).toList();
+    return response.data.map(PitchResponse.fromJson).toList();
   }
 
-  Future<PitchModel> createPitch({
+  Future<PitchResponse> createPitch({
     required String venueId,
     required CreatePitchRequest request,
   }) async {
@@ -42,10 +42,10 @@ class PitchDataSource {
       parser: parseApiObject,
     );
 
-    return PitchModel.fromJson(response.data);
+    return PitchResponse.fromJson(response.data);
   }
 
-  Future<PitchModel> updatePitch({
+  Future<PitchResponse> updatePitch({
     required String pitchId,
     required CreatePitchRequest request,
   }) async {
@@ -55,7 +55,7 @@ class PitchDataSource {
       parser: parseApiObject,
     );
 
-    return PitchModel.fromJson(response.data);
+    return PitchResponse.fromJson(response.data);
   }
 
   Future<void> deletePitch(String pitchId) async {
@@ -65,15 +65,15 @@ class PitchDataSource {
     );
   }
 
-  Future<List<PitchPriceModel>> getPitchPrices(String pitchId) async {
+  Future<List<PitchPriceResponse>> getPitchPrices(String pitchId) async {
     final response = await _apiClient.get<List<Map<String, dynamic>>>(
       AppEndpoints.pitchPrices(pitchId),
       parser: parseApiObjectList,
     );
-    return response.data.map(PitchPriceModel.fromJson).toList();
+    return response.data.map(PitchPriceResponse.fromJson).toList();
   }
 
-  Future<PitchPriceModel> createPitchPrice({
+  Future<PitchPriceResponse> createPitchPrice({
     required String pitchId,
     required CreatePitchPriceRequest request,
   }) async {
@@ -83,10 +83,10 @@ class PitchDataSource {
       parser: parseApiObject,
     );
 
-    return PitchPriceModel.fromJson(response.data);
+    return PitchPriceResponse.fromJson(response.data);
   }
 
-  Future<PitchPriceModel> updatePitchPrice({
+  Future<PitchPriceResponse> updatePitchPrice({
     required String priceId,
     required CreatePitchPriceRequest request,
   }) async {
@@ -96,7 +96,7 @@ class PitchDataSource {
       parser: parseApiObject,
     );
 
-    return PitchPriceModel.fromJson(response.data);
+    return PitchPriceResponse.fromJson(response.data);
   }
 
   Future<void> deletePitchPrice(String priceId) async {

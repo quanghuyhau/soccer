@@ -8,41 +8,41 @@ class BookingDataSource {
 
   final ApiClient _apiClient;
 
-  Future<BookingModel> createBooking(CreateBookingRequest request) async {
+  Future<BookingResponse> createBooking(CreateBookingRequest request) async {
     final response = await _apiClient.post<Map<String, dynamic>>(
       AppEndpoints.bookings,
       data: request.toJson(),
       parser: parseApiObject,
     );
 
-    return BookingModel.fromJson(response.data);
+    return BookingResponse.fromJson(response.data);
   }
 
-  Future<List<BookingModel>> getBookings() async {
+  Future<List<BookingResponse>> getBookings() async {
     final response = await _apiClient.get<List<Map<String, dynamic>>>(
       AppEndpoints.bookings,
       parser: parseApiObjectList,
     );
-    return response.data.map(BookingModel.fromJson).toList();
+    return response.data.map(BookingResponse.fromJson).toList();
   }
 
-  Future<List<BookingModel>> getMyBookings() async {
+  Future<List<BookingResponse>> getMyBookings() async {
     final response = await _apiClient.get<List<Map<String, dynamic>>>(
       AppEndpoints.myBookings,
       parser: parseApiObjectList,
     );
-    return response.data.map(BookingModel.fromJson).toList();
+    return response.data.map(BookingResponse.fromJson).toList();
   }
 
-  Future<List<BookingModel>> getBookingsByPitch(String pitchId) async {
+  Future<List<BookingResponse>> getBookingsByPitch(String pitchId) async {
     final response = await _apiClient.get<List<Map<String, dynamic>>>(
       AppEndpoints.pitchBookings(pitchId),
       parser: parseApiObjectList,
     );
-    return response.data.map(BookingModel.fromJson).toList();
+    return response.data.map(BookingResponse.fromJson).toList();
   }
 
-  Future<BookingModel> updateBookingStatus({
+  Future<BookingResponse> updateBookingStatus({
     required String bookingId,
     required UpdateBookingStatusRequest request,
   }) async {
@@ -52,6 +52,6 @@ class BookingDataSource {
       parser: parseApiObject,
     );
 
-    return BookingModel.fromJson(response.data);
+    return BookingResponse.fromJson(response.data);
   }
 }

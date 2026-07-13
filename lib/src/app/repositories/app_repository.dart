@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/repositories/auth_repository_impl.dart';
+import '../data/repositories/booking_repository_impl.dart';
+import '../data/repositories/pitch_repository_impl.dart';
+import '../data/repositories/venue_repository_impl.dart';
 import '../data_sources/app_data_source.dart';
 import 'auth_repository.dart';
 import 'booking_repository.dart';
-import 'impl/auth_repository_impl.dart';
-import 'impl/booking_repository_impl.dart';
-import 'impl/pitch_repository_impl.dart';
-import 'impl/venue_repository_impl.dart';
 import 'pitch_repository.dart';
 import 'venue_repository.dart';
 

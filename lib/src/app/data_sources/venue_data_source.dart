@@ -8,41 +8,41 @@ class VenueDataSource {
 
   final ApiClient _apiClient;
 
-  Future<List<VenueModel>> getVenues() async {
+  Future<List<VenueResponse>> getVenues() async {
     final response = await _apiClient.get<List<Map<String, dynamic>>>(
       AppEndpoints.venues,
       parser: parseApiObjectList,
     );
-    return response.data.map(VenueModel.fromJson).toList();
+    return response.data.map(VenueResponse.fromJson).toList();
   }
 
-  Future<VenueModel> getVenue(String venueId) async {
+  Future<VenueResponse> getVenue(String venueId) async {
     final response = await _apiClient.get<Map<String, dynamic>>(
       AppEndpoints.venue(venueId),
       parser: parseApiObject,
     );
-    return VenueModel.fromJson(response.data);
+    return VenueResponse.fromJson(response.data);
   }
 
-  Future<List<VenueModel>> getVenuesByOwner(String ownerId) async {
+  Future<List<VenueResponse>> getVenuesByOwner(String ownerId) async {
     final response = await _apiClient.get<List<Map<String, dynamic>>>(
       AppEndpoints.venuesByOwner(ownerId),
       parser: parseApiObjectList,
     );
-    return response.data.map(VenueModel.fromJson).toList();
+    return response.data.map(VenueResponse.fromJson).toList();
   }
 
-  Future<VenueModel> createVenue(CreateVenueRequest request) async {
+  Future<VenueResponse> createVenue(CreateVenueRequest request) async {
     final response = await _apiClient.post<Map<String, dynamic>>(
       AppEndpoints.venues,
       data: request.toJson(),
       parser: parseApiObject,
     );
 
-    return VenueModel.fromJson(response.data);
+    return VenueResponse.fromJson(response.data);
   }
 
-  Future<VenueModel> updateVenue({
+  Future<VenueResponse> updateVenue({
     required String venueId,
     required CreateVenueRequest request,
   }) async {
@@ -52,7 +52,7 @@ class VenueDataSource {
       parser: parseApiObject,
     );
 
-    return VenueModel.fromJson(response.data);
+    return VenueResponse.fromJson(response.data);
   }
 
   Future<void> deleteVenue(String venueId) async {

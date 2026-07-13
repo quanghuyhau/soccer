@@ -10,26 +10,26 @@ class AuthDataSource {
 
   final ApiClient _apiClient;
 
-  Future<AuthTokensModel> login(LoginRequest request) async {
+  Future<AuthTokensResponse> login(LoginRequest request) async {
     final response = await _apiClient.post<Map<String, dynamic>>(
       AppEndpoints.authLogin,
       data: request.toJson(),
       parser: parseApiObject,
     );
-    return AuthTokensModel.fromJson(response.data);
+    return AuthTokensResponse.fromJson(response.data);
   }
 
-  Future<AppUserModel> register(RegisterRequest request) async {
+  Future<AppUserResponse> register(RegisterRequest request) async {
     final response = await _apiClient.post<Map<String, dynamic>>(
       AppEndpoints.authRegister,
       data: request.toJson(),
       parser: parseApiObject,
     );
 
-    return AppUserModel.fromJson(response.data);
+    return AppUserResponse.fromJson(response.data);
   }
 
-  Future<AppUserModel> getCurrentUser({String? accessToken}) async {
+  Future<AppUserResponse> getCurrentUser({String? accessToken}) async {
     final response = await _apiClient.request<Map<String, dynamic>>(
       AppEndpoints.currentUser,
       parser: parseApiObject,
@@ -38,6 +38,6 @@ class AuthDataSource {
           : Options(headers: {'Authorization': 'Bearer $accessToken'}),
     );
 
-    return AppUserModel.fromJson(response.data);
+    return AppUserResponse.fromJson(response.data);
   }
 }
