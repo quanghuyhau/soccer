@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/models/app_models.dart';
-import '../../app/session/app_session.dart';
-import '../../core/error/app_exception.dart';
 import '../../core/utils/app_formatters.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_design.dart';
@@ -31,18 +29,19 @@ class CreateBookingScreen extends ConsumerStatefulWidget {
 class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
   late final TextEditingController _nameController;
   late final TextEditingController _phoneController;
-  final _dateController = TextEditingController(
-    text: AppFormatters.date(DateTime.now()),
-  );
-  final _noteController = TextEditingController();
-  DateTime? _selectedSlotStart;
+  late final TextEditingController _dateController;
+  late final TextEditingController _noteController;
 
   @override
   void initState() {
     super.initState();
-    final user = ref.read(appSessionProvider)?.user;
-    _nameController = TextEditingController(text: user?.fullName ?? '');
-    _phoneController = TextEditingController(text: user?.phone ?? '');
+    final initialState = ref.read(createBookingControllerProvider(widget.prices));
+    _nameController = TextEditingController(text: initialState.customerName);
+    _phoneController = TextEditingController(text: initialState.customerPhone);
+    _dateController = TextEditingController(
+      text: AppFormatters.date(initialState.selectedDate),
+    );
+    _noteController = TextEditingController(text: initialState.note);
   }
 
   @override
@@ -56,26 +55,10 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final createState = ref.watch(createBookingControllerProvider);
-    final slots = _availableSlots();
-    final selectedSlot = _selectedSlot(slots);
+    final state = ref.watch(createBookingControllerProvider(widget.prices));
+    final slots = state.availableSlots;
+    final selectedSlot = state.selectedSlot;
     final preview = _previewPrice(selectedSlot);
-
-    ref.listen(createBookingControllerProvider, (previous, next) {
-      next.whenOrNull(
-        data: (booking) {
-          if (booking == null || previous?.isLoading != true) {
-            return;
-          }
-
-          AppToast.success(context, 'Đặt sân thành công');
-          Navigator.of(context).pop();
-        },
-        error: (error, stackTrace) {
-          AppToast.error(context, _bookingErrorMessage(error));
-        },
-      );
-    });
 
     return BaseScreen(
       title: 'Tạo booking',
@@ -94,30 +77,53 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  _field(_nameController, 'Tên khách hàng', Icons.person),
-                  _field(_phoneController, 'Số điện thoại', Icons.phone),
+                  _field(
+                    _nameController,
+                    'Tên khách hàng',
+                    Icons.person,
+                    onChanged: (val) {
+                      ref.read(createBookingControllerProvider(widget.prices).notifier).updateName(val.trim());
+                    },
+                  ),
+                  _field(
+                    _phoneController,
+                    'Số điện thoại',
+                    Icons.phone,
+                    keyboardType: TextInputType.phone,
+                    onChanged: (val) {
+                      ref.read(createBookingControllerProvider(widget.prices).notifier).updatePhone(val.trim());
+                    },
+                  ),
                   _field(
                     _dateController,
                     'Ngày',
                     Icons.today,
-                    onChanged: (_) {
-                      setState(() => _selectedSlotStart = null);
-                    },
+                    onChanged: (_) {}, // Custom date picker could be wired here
                   ),
                   _SlotPicker(
                     slots: slots,
                     selectedSlot: selectedSlot,
                     onSelected: (slot) {
-                      setState(() => _selectedSlotStart = slot.startTime);
+                      ref
+                          .read(createBookingControllerProvider(widget.prices).notifier)
+                          .selectSlot(slot.startTime);
                     },
                   ),
                   _PricePreviewCard(preview: preview, prices: widget.prices),
-                  _field(_noteController, 'Ghi chú', Icons.notes, maxLines: 3),
+                  _field(
+                    _noteController,
+                    'Ghi chú',
+                    Icons.notes,
+                    maxLines: 3,
+                    onChanged: (val) {
+                      ref.read(createBookingControllerProvider(widget.prices).notifier).updateNote(val.trim());
+                    },
+                  ),
                   const SizedBox(height: 4),
                   AppButton.primary(
                     label: 'Xác nhận đặt sân',
                     icon: const Icon(Icons.check_circle_outline),
-                    isLoading: createState.isLoading,
+                    isLoading: state.submitStatus.isLoading,
                     isExpanded: true,
                     onPressed: _submit,
                   ),
@@ -152,30 +158,17 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
   }
 
   void _submit() {
-    final slot = _selectedSlot(_availableSlots());
-    final startTime = slot?.startTime;
-    final endTime = slot?.endTime;
-
-    if (startTime == null || endTime == null) {
-      AppToast.info(context, 'Vui lòng chọn khung giờ hợp lệ');
-      return;
-    }
-
-    ref
-        .read(createBookingControllerProvider.notifier)
-        .create(
-          CreateBookingRequest(
-            pitchId: widget.pitch.id,
-            customerName: _nameController.text.trim(),
-            customerPhone: _phoneController.text.trim(),
-            startTime: startTime,
-            endTime: endTime,
-            note: _noteController.text.trim(),
-          ),
+    ref.read(createBookingControllerProvider(widget.prices).notifier).submit(
+          pitchId: widget.pitch.id,
+          onError: (msg) => AppToast.error(context, msg),
+          onSuccess: () {
+            AppToast.success(context, 'Đặt sân thành công');
+            Navigator.of(context).pop();
+          },
         );
   }
 
-  _PricePreview _previewPrice(_BookingSlot? slot) {
+  _PricePreview _previewPrice(BookingSlot? slot) {
     if (widget.prices.isEmpty) {
       return const _PricePreview(
         message: 'Sân này chưa có bảng giá. Backend sẽ báo lỗi nếu đặt ngay.',
@@ -193,89 +186,6 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
       message: 'Giá tạm tính. Giá cuối cùng lấy từ backend sau khi đặt.',
     );
   }
-
-  DateTime? _dateTimeAt(String date, String time) {
-    final normalizedTime = time.length == 5 ? '$time:00' : time;
-    return DateTime.tryParse('${date}T$normalizedTime');
-  }
-
-  List<_BookingSlot> _availableSlots() {
-    final date = _dateController.text.trim();
-    final slots = <_BookingSlot>[];
-
-    for (final price in widget.prices) {
-      if (price.slotMinutes != _slotMinutes) {
-        continue;
-      }
-
-      final rangeStart = _dateTimeAt(date, price.startTime);
-      var rangeEnd = _dateTimeAt(date, price.endTime);
-
-      if (rangeStart == null || rangeEnd == null) {
-        continue;
-      }
-
-      if (!rangeEnd.isAfter(rangeStart)) {
-        rangeEnd = rangeEnd.add(const Duration(days: 1));
-      }
-
-      var cursor = rangeStart;
-      while (!cursor.add(_slotDuration).isAfter(rangeEnd)) {
-        slots.add(
-          _BookingSlot(
-            startTime: cursor,
-            endTime: cursor.add(_slotDuration),
-            price: price,
-          ),
-        );
-        cursor = cursor.add(_slotDuration);
-      }
-    }
-
-    slots.sort((a, b) => a.startTime.compareTo(b.startTime));
-    return slots;
-  }
-
-  _BookingSlot? _selectedSlot(List<_BookingSlot> slots) {
-    if (slots.isEmpty) {
-      return null;
-    }
-
-    for (final slot in slots) {
-      if (slot.startTime == _selectedSlotStart) {
-        return slot;
-      }
-    }
-
-    return slots.first;
-  }
-
-  Object _bookingErrorMessage(Object error) {
-    if (error is AppException) {
-      if (error.message.contains('chưa được cấu hình giá')) {
-        return 'Sân này chưa có bảng giá cho khung giờ đã chọn.';
-      }
-
-      return error.message;
-    }
-
-    return 'Không tạo được booking';
-  }
-}
-
-const _slotMinutes = 90;
-const _slotDuration = Duration(minutes: _slotMinutes);
-
-class _BookingSlot {
-  const _BookingSlot({
-    required this.startTime,
-    required this.endTime,
-    required this.price,
-  });
-
-  final DateTime startTime;
-  final DateTime endTime;
-  final PitchPrice price;
 }
 
 class _PricePreview {
@@ -292,9 +202,9 @@ class _SlotPicker extends StatelessWidget {
     required this.onSelected,
   });
 
-  final List<_BookingSlot> slots;
-  final _BookingSlot? selectedSlot;
-  final ValueChanged<_BookingSlot> onSelected;
+  final List<BookingSlot> slots;
+  final BookingSlot? selectedSlot;
+  final ValueChanged<BookingSlot> onSelected;
 
   @override
   Widget build(BuildContext context) {
