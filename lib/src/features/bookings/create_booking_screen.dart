@@ -9,7 +9,7 @@ import '../../core/widgets/app_feedback.dart';
 import '../../core/widgets/base_screen.dart';
 import 'bookings_controller.dart';
 
-class CreateBookingScreen extends ConsumerStatefulWidget {
+class CreateBookingScreen extends ConsumerWidget {
   const CreateBookingScreen({
     super.key,
     required this.venue,
@@ -22,40 +22,9 @@ class CreateBookingScreen extends ConsumerStatefulWidget {
   final List<PitchPrice> prices;
 
   @override
-  ConsumerState<CreateBookingScreen> createState() =>
-      _CreateBookingScreenState();
-}
-
-class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
-  late final TextEditingController _nameController;
-  late final TextEditingController _phoneController;
-  late final TextEditingController _dateController;
-  late final TextEditingController _noteController;
-
-  @override
-  void initState() {
-    super.initState();
-    final initialState = ref.read(createBookingControllerProvider(widget.prices));
-    _nameController = TextEditingController(text: initialState.customerName);
-    _phoneController = TextEditingController(text: initialState.customerPhone);
-    _dateController = TextEditingController(
-      text: AppFormatters.date(initialState.selectedDate),
-    );
-    _noteController = TextEditingController(text: initialState.note);
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    _dateController.dispose();
-    _noteController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final state = ref.watch(createBookingControllerProvider(widget.prices));
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(createBookingControllerProvider(prices));
+    final notifier = ref.read(createBookingControllerProvider(prices).notifier);
     final slots = state.availableSlots;
     final selectedSlot = state.selectedSlot;
     final preview = _previewPrice(selectedSlot);
@@ -67,8 +36,8 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
         padding: const EdgeInsets.all(20),
         children: [
           AppHeroPanel(
-            title: widget.pitch.name,
-            subtitle: widget.venue.name,
+            title: pitch.name,
+            subtitle: venue.name,
             icon: Icons.add_task,
           ),
           const SizedBox(height: 16),
@@ -78,46 +47,34 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
               child: Column(
                 children: [
                   _field(
-                    _nameController,
+                    notifier.nameController,
                     'Tên khách hàng',
                     Icons.person,
-                    onChanged: (val) {
-                      ref.read(createBookingControllerProvider(widget.prices).notifier).updateName(val.trim());
-                    },
                   ),
                   _field(
-                    _phoneController,
+                    notifier.phoneController,
                     'Số điện thoại',
                     Icons.phone,
                     keyboardType: TextInputType.phone,
-                    onChanged: (val) {
-                      ref.read(createBookingControllerProvider(widget.prices).notifier).updatePhone(val.trim());
-                    },
                   ),
                   _field(
-                    _dateController,
+                    notifier.dateController,
                     'Ngày',
                     Icons.today,
-                    onChanged: (_) {}, // Custom date picker could be wired here
                   ),
                   _SlotPicker(
                     slots: slots,
                     selectedSlot: selectedSlot,
                     onSelected: (slot) {
-                      ref
-                          .read(createBookingControllerProvider(widget.prices).notifier)
-                          .selectSlot(slot.startTime);
+                      notifier.selectSlot(slot.startTime);
                     },
                   ),
-                  _PricePreviewCard(preview: preview, prices: widget.prices),
+                  _PricePreviewCard(preview: preview, prices: prices),
                   _field(
-                    _noteController,
+                    notifier.noteController,
                     'Ghi chú',
                     Icons.notes,
                     maxLines: 3,
-                    onChanged: (val) {
-                      ref.read(createBookingControllerProvider(widget.prices).notifier).updateNote(val.trim());
-                    },
                   ),
                   const SizedBox(height: 4),
                   AppButton.primary(
@@ -125,7 +82,7 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
                     icon: const Icon(Icons.check_circle_outline),
                     isLoading: state.submitStatus.isLoading,
                     isExpanded: true,
-                    onPressed: _submit,
+                    onPressed: () => _submit(context, ref),
                   ),
                 ],
               ),
@@ -142,7 +99,6 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
     IconData icon, {
     TextInputType? keyboardType,
     int maxLines = 1,
-    ValueChanged<String>? onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -152,14 +108,13 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
         icon: icon,
         keyboardType: keyboardType,
         maxLines: maxLines,
-        onChanged: onChanged,
       ),
     );
   }
 
-  void _submit() {
-    ref.read(createBookingControllerProvider(widget.prices).notifier).submit(
-          pitchId: widget.pitch.id,
+  void _submit(BuildContext context, WidgetRef ref) {
+    ref.read(createBookingControllerProvider(prices).notifier).submit(
+          pitchId: pitch.id,
           onError: (msg) => AppToast.error(context, msg),
           onSuccess: () {
             AppToast.success(context, 'Đặt sân thành công');
@@ -169,7 +124,7 @@ class _CreateBookingScreenState extends ConsumerState<CreateBookingScreen> {
   }
 
   _PricePreview _previewPrice(BookingSlot? slot) {
-    if (widget.prices.isEmpty) {
+    if (prices.isEmpty) {
       return const _PricePreview(
         message: 'Sân này chưa có bảng giá. Backend sẽ báo lỗi nếu đặt ngay.',
       );

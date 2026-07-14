@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -5,6 +6,7 @@ import '../../app/models/app_models.dart';
 import '../../app/session/app_session.dart';
 import '../../app/use_cases/app_use_case.dart';
 import '../../core/error/app_exception.dart';
+import '../../core/state/disposable_notifier.dart';
 import '../../core/utils/app_formatters.dart';
 
 final myBookingsControllerProvider = FutureProvider.autoDispose<List<Booking>>((
@@ -129,7 +131,7 @@ final createBookingControllerProvider = StateNotifierProvider.autoDispose
   return CreateBookingController(ref, prices);
 });
 
-class CreateBookingController extends StateNotifier<CreateBookingState> {
+class CreateBookingController extends StateNotifier<CreateBookingState> with DisposableNotifierMixin<CreateBookingState> {
   CreateBookingController(this._ref, List<PitchPrice> prices)
       : super(
           CreateBookingState(
@@ -139,24 +141,55 @@ class CreateBookingController extends StateNotifier<CreateBookingState> {
             note: '',
             prices: prices,
           ),
-        );
+        ) {
+    nameController = registerDisposable(TextEditingController(text: state.customerName));
+    phoneController = registerDisposable(TextEditingController(text: state.customerPhone));
+    dateController = registerDisposable(TextEditingController(
+      text: AppFormatters.date(state.selectedDate),
+    ));
+    noteController = registerDisposable(TextEditingController(text: state.note));
+
+    nameController.addListener(() {
+      updateName(nameController.text);
+    });
+    phoneController.addListener(() {
+      updatePhone(phoneController.text);
+    });
+    noteController.addListener(() {
+      updateNote(noteController.text);
+    });
+  }
 
   final Ref _ref;
+  late final TextEditingController nameController;
+  late final TextEditingController phoneController;
+  late final TextEditingController dateController;
+  late final TextEditingController noteController;
 
   void updateName(String name) {
-    state = state.copyWith(customerName: name);
+    if (state.customerName != name) {
+      state = state.copyWith(customerName: name);
+    }
   }
 
   void updatePhone(String phone) {
-    state = state.copyWith(customerPhone: phone);
+    if (state.customerPhone != phone) {
+      state = state.copyWith(customerPhone: phone);
+    }
   }
 
   void updateDate(DateTime date) {
     state = state.copyWith(selectedDate: date, selectedSlotStart: () => null);
+    final dateStr = AppFormatters.date(date);
+    if (dateController.text != dateStr) {
+      dateController.text = dateStr;
+    }
   }
 
   void updateNote(String note) {
-    state = state.copyWith(note: note);
+    if (state.note != note) {
+      state = state.copyWith(note: note);
+    }
   }
 
   void selectSlot(DateTime startTime) {
