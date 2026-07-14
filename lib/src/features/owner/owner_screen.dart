@@ -8,6 +8,7 @@ import '../../core/widgets/base_screen.dart';
 import '../bookings/my_bookings_screen.dart';
 import '../venues/venue_detail_screen.dart';
 import 'owner_controller.dart';
+import 'owner_state.dart';
 import 'venue_dialog.dart';
 
 class OwnerScreen extends ConsumerWidget {

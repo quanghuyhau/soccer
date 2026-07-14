@@ -8,6 +8,7 @@ import '../../core/widgets/app_design.dart';
 import '../../core/widgets/app_feedback.dart';
 import '../../core/widgets/base_screen.dart';
 import 'bookings_controller.dart';
+import 'bookings_state.dart';
 
 class CreateBookingScreen extends ConsumerWidget {
   const CreateBookingScreen({

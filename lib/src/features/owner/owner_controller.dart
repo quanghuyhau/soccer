@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import '../../app/models/app_models.dart';
 import '../../app/session/app_session.dart';
 import '../../app/use_cases/app_use_case.dart';
+import 'owner_state.dart';
 
 final ownerDashboardControllerProvider =
     FutureProvider.autoDispose<OwnerDashboardData>((ref) async {
@@ -42,12 +43,6 @@ final venueMutationControllerProvider =
       return VenueMutationController(ref);
     });
 
-class OwnerDashboardData {
-  const OwnerDashboardData({required this.venues, required this.bookings});
-
-  final List<Venue> venues;
-  final List<Booking> bookings;
-}
 
 class VenueMutationController extends StateNotifier<AsyncValue<Object?>> {
   VenueMutationController(this._ref) : super(const AsyncData(null));
