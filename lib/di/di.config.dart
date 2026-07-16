@@ -8,24 +8,24 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:atm_soundbox/data/data_source/local/local_storage.dart'
+import 'package:soccer_soundbox/data/data_source/local/local_storage.dart'
     as _i323;
-import 'package:atm_soundbox/data/data_source/local/pref/shared_preferences_manager.dart'
+import 'package:soccer/data/data_source/local/pref/shared_preferences_manager.dart'
     as _i469;
-import 'package:atm_soundbox/data/data_source/services/api_service.dart'
+import 'package:soccer/data/data_source/services/api_service.dart'
     as _i409;
-import 'package:atm_soundbox/data/repositories/login_repo_impl.dart' as _i458;
-import 'package:atm_soundbox/di/environment/build_config.dart' as _i103;
-import 'package:atm_soundbox/di/environment/build_config_prod.dart' as _i562;
-import 'package:atm_soundbox/di/environment/build_config_uat.dart' as _i720;
-import 'package:atm_soundbox/di/module/conponents_module.dart' as _i5;
-import 'package:atm_soundbox/di/module/network_module.dart' as _i989;
-import 'package:atm_soundbox/domain/repositories/login_repository.dart'
+import 'package:soccer/data/repositories/login_repo_impl.dart' as _i458;
+import 'package:soccer/di/environment/build_config.dart' as _i103;
+import 'package:soccer/di/environment/build_config_prod.dart' as _i562;
+import 'package:soccer/di/environment/build_config_uat.dart' as _i720;
+import 'package:soccer/di/module/conponents_module.dart' as _i5;
+import 'package:soccer/di/module/network_module.dart' as _i989;
+import 'package:soccer/domain/repositories/login_repository.dart'
     as _i302;
-import 'package:atm_soundbox/domain/use_cases/login_usecase.dart' as _i782;
-import 'package:atm_soundbox/presentation/common/toast/toast_widget.dart'
+import 'package:soccer/domain/use_cases/login_usecase.dart' as _i782;
+import 'package:soccer/presentation/common/toast/toast_widget.dart'
     as _i125;
-import 'package:atm_soundbox/presentation/screens/login/cubit/login_cubit.dart'
+import 'package:soccer/presentation/screens/login/cubit/login_cubit.dart'
     as _i142;
 import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;

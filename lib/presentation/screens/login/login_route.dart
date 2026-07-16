@@ -1,9 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:atm_soundbox/di/di.dart';
-import 'package:atm_soundbox/presentation/screens/login/cubit/login_cubit.dart';
-import 'package:atm_soundbox/presentation/screens/login/ui/login_screen.dart';
-import 'package:atm_soundbox/utilities/routes/app_router.dart';
-import 'package:atm_soundbox/utilities/routes/route_define.dart';
+import 'package:soccer/di/di.dart';
+import 'package:soccer/presentation/screens/login/cubit/login_cubit.dart';
+import 'package:soccer/presentation/screens/login/ui/login_screen.dart';
+import 'package:soccer/utilities/routes/app_router.dart';
+import 'package:soccer/utilities/routes/route_define.dart';
 
 class LoginRoute extends RouteDefine {
   @override

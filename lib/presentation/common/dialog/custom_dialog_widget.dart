@@ -1,8 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:atm_soundbox/presentation/common/button/app_button.dart';
-import 'package:atm_soundbox/utilities/style/style.dart';
+import 'package:soccer/presentation/common/button/app_button.dart';
+import 'package:soccer/utilities/style/style.dart';
 
 class CustomDialog extends StatelessWidget {
   const CustomDialog({

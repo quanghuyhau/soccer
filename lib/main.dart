@@ -1,12 +1,12 @@
-import 'package:atm_soundbox/helpers/fcm_utils.dart';
+import 'package:soccer/helpers/fcm_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:atm_soundbox/di/di.dart';
-import 'package:atm_soundbox/di/environment/build_config.dart';
-import 'package:atm_soundbox/presentation/application/application.dart';
-import 'package:atm_soundbox/utilities/ultils/logging.dart';
-import 'package:atm_soundbox/utilities/ultils/ultis.dart';
+import 'package:soccer/di/di.dart';
+import 'package:soccer/di/environment/build_config.dart';
+import 'package:soccer/presentation/application/application.dart';
+import 'package:soccer/utilities/ultils/logging.dart';
+import 'package:soccer/utilities/ultils/ultis.dart';
 
 const env =
     String.fromEnvironment('FLUTTER_APP_FLAVOR', defaultValue: CustomEnv.uat);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:atm_soundbox/generated/assets.dart';
-import 'package:atm_soundbox/presentation/common/load_image/load_image.dart';
-import 'package:atm_soundbox/utilities/style/style.dart';
+import 'package:soccer/generated/assets.dart';
+import 'package:soccer/presentation/common/load_image/load_image.dart';
+import 'package:soccer/utilities/style/style.dart';
 
 class BaseAppBar extends StatelessWidget implements PreferredSizeWidget {
   const BaseAppBar({

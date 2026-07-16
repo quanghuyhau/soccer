@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:atm_soundbox/generated/assets.dart';
-import 'package:atm_soundbox/generated/l10n.dart';
-import 'package:atm_soundbox/presentation/common/load_image/load_image.dart';
-import 'package:atm_soundbox/utilities/style/style.dart';
+import 'package:soccer/generated/assets.dart';
+import 'package:soccer/generated/l10n.dart';
+import 'package:soccer/presentation/common/load_image/load_image.dart';
+import 'package:soccer/utilities/style/style.dart';
 
 class EmptyWidget extends StatelessWidget {
   final String? description;

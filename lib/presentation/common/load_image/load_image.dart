@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:atm_soundbox/utilities/style/style.dart';
+import 'package:soccer/utilities/style/style.dart';
 
 enum TypeReadImage { svgAsset, svgNetWork, imageAsset, imageNetWork }
 

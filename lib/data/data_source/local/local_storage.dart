@@ -1,7 +1,8 @@
-import 'package:atm_soundbox/data/data_source/local/pref/shared_preferences_manager.dart';
-import 'package:atm_soundbox/utilities/constants/constants.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
+import 'package:soccer/data/data_source/local/pref/shared_preferences_manager.dart';
+
+import '../../../utilities/constants/constants.dart';
 
 @injectable
 class LocalStorage {

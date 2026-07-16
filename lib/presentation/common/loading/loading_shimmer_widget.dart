@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:atm_soundbox/utilities/style/style.dart';
+import 'package:soccer/utilities/style/style.dart';
 
 class AppLoadingShimmer extends StatelessWidget {
   const AppLoadingShimmer({

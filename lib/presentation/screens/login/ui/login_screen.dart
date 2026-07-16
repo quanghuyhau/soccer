@@ -1,6 +1,6 @@
-import 'package:atm_soundbox/presentation/common/app_scaffold_widget.dart';
-import 'package:atm_soundbox/presentation/screens/login/cubit/login_cubit.dart';
-import 'package:atm_soundbox/utilities/style/style.dart';
+import 'package:soccer/presentation/common/app_scaffold_widget.dart';
+import 'package:soccer/presentation/screens/login/cubit/login_cubit.dart';
+import 'package:soccer/utilities/style/style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

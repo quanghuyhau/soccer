@@ -1,5 +1,5 @@
-import 'package:atm_soundbox/domain/repositories/login_repository.dart';
 import 'package:injectable/injectable.dart';
+import 'package:soccer/domain/repositories/login_repository.dart';
 
 @injectable
 class LoginUseCase {

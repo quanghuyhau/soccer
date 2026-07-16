@@ -1,8 +1,8 @@
-import 'package:atm_soundbox/data/data_source/local/local_storage.dart';
-import 'package:atm_soundbox/data/data_source/services/api_service.dart';
-import 'package:atm_soundbox/data/models/request/login_request.dart';
-import 'package:atm_soundbox/domain/repositories/login_repository.dart';
 import 'package:injectable/injectable.dart';
+import 'package:soccer/data/data_source/local/local_storage.dart';
+import 'package:soccer/data/data_source/services/api_service.dart';
+import 'package:soccer/data/models/request/login_request.dart';
+import 'package:soccer/domain/repositories/login_repository.dart';
 
 @Injectable(as: LoginRepository)
 class LoginRepositoryImpl implements LoginRepository {

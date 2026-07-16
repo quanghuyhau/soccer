@@ -1,13 +1,14 @@
-import 'package:atm_soundbox/data/data_source/services/api_service.dart';
-import 'package:atm_soundbox/di/environment/build_config.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import 'package:atm_soundbox/data/data_source/local/local_storage.dart';
-import 'package:atm_soundbox/di/di.dart';
-import 'package:atm_soundbox/utilities/constants/constants.dart';
-import 'package:atm_soundbox/utilities/ultils/logging.dart';
-import 'package:atm_soundbox/utilities/ultils/ultis.dart';
 import 'package:injectable/injectable.dart';
+import 'package:soccer/data/data_source/local/local_storage.dart';
+import 'package:soccer/data/data_source/services/api_service.dart';
+import 'package:soccer/di/di.dart';
+import 'package:soccer/di/environment/build_config.dart';
+import 'package:soccer/utilities/ultils/logging.dart';
+import 'package:soccer/utilities/ultils/ultis.dart';
+
+import '../../utilities/constants/constants.dart';
 
 @module
 abstract class NetworkModule {
