@@ -45,7 +45,9 @@ class _ApplicationState extends State<Application> {
         fallbackLocale: const Locale('vi'),
         initialRoute: initRoute,
         onGenerateRoute: (settings) => manifest(generateRoutes, settings),
-        builder: EasyLoading.init(),
+        builder: (context, child) {
+                   return EasyLoading.init()(context, child);
+                 },
       ),
     );
   }

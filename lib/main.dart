@@ -19,10 +19,10 @@ void main() async {
 
   await Utils.initSystemInfo();
 
-  // Init FCM
-  await FCMService.I.initialize();
-  FCMService.I.getInitialFCMMessage();
-  Log.info('FCM Token: ', await FCMService.I.getToken() ?? '');
+  // // Init FCM
+  // await FCMService.I.initialize();
+  // FCMService.I.getInitialFCMMessage();
+  // Log.info('FCM Token: ', await FCMService.I.getToken() ?? '');
 
   await configureDependencies(env: env);
 

@@ -12,6 +12,9 @@ val newBuildDir: Directory =
 rootProject.layout.buildDirectory.value(newBuildDir)
 
 subprojects {
+    if (project.name == "flutter_localization") {
+        plugins.apply("org.jetbrains.kotlin.android")
+    }
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
