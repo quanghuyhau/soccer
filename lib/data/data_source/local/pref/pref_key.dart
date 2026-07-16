@@ -1,0 +1,1 @@
+const prefDisplayIntroduction = 'pref_display_introduction';
