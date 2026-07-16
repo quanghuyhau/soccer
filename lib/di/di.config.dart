@@ -39,6 +39,16 @@ import 'package:soccer/domain/use_cases/login_usecase.dart' as _i1046;
 import 'package:soccer/presentation/common/toast/toast_widget.dart' as _i898;
 import 'package:soccer/presentation/screens/login/cubit/login_cubit.dart'
     as _i858;
+import 'package:soccer/presentation/screens/my_bookings/cubit/my_bookings_cubit.dart'
+    as _i845;
+import 'package:soccer/presentation/screens/owner_prices/cubit/owner_prices_cubit.dart'
+    as _i428;
+import 'package:soccer/presentation/screens/pitch_detail/cubit/pitch_detail_cubit.dart'
+    as _i278;
+import 'package:soccer/presentation/screens/venue_detail/cubit/venue_detail_cubit.dart'
+    as _i228;
+import 'package:soccer/presentation/screens/venues/cubit/venues_cubit.dart'
+    as _i744;
 
 const String _uat = 'uat';
 const String _prod = 'prod';
@@ -108,6 +118,9 @@ extension GetItInjectableX on _i174.GetIt {
         bookingRepository: gh<_i378.BookingRepository>(),
       ),
     );
+    gh.factory<_i845.MyBookingsCubit>(
+      () => _i845.MyBookingsCubit(bookingUseCase: gh<_i683.BookingUseCase>()),
+    );
     gh.factory<_i143.GetPitchesUseCase>(
       () =>
           _i143.GetPitchesUseCase(venueRepository: gh<_i771.VenueRepository>()),
@@ -115,6 +128,25 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i697.GetVenuesUseCase>(
       () =>
           _i697.GetVenuesUseCase(venueRepository: gh<_i771.VenueRepository>()),
+    );
+    gh.factory<_i278.PitchDetailCubit>(
+      () => _i278.PitchDetailCubit(
+        getPitchPricesUseCase: gh<_i856.GetPitchPricesUseCase>(),
+        bookingUseCase: gh<_i683.BookingUseCase>(),
+      ),
+    );
+    gh.factory<_i228.VenueDetailCubit>(
+      () => _i228.VenueDetailCubit(
+        getPitchesUseCase: gh<_i143.GetPitchesUseCase>(),
+      ),
+    );
+    gh.factory<_i428.OwnerPricesCubit>(
+      () => _i428.OwnerPricesCubit(
+        getPitchPricesUseCase: gh<_i856.GetPitchPricesUseCase>(),
+      ),
+    );
+    gh.factory<_i744.VenuesCubit>(
+      () => _i744.VenuesCubit(getVenuesUseCase: gh<_i697.GetVenuesUseCase>()),
     );
     return this;
   }

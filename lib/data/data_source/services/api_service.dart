@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:retrofit/http.dart';
+import 'package:retrofit/retrofit.dart';
 import 'package:soccer/data/models/request/login_request.dart';
 import 'package:soccer/data/models/request/pitch_price_request.dart';
 import 'package:soccer/data/models/request/booking_request.dart';
